@@ -1,9 +1,22 @@
 "use client";
 
-import { SearchOffOutlined, SearchOutlined } from "@mui/icons-material";
-import { InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import ModalFilter from "@components/reuseable/ModalFIlter";
+import {
+  Filter1Outlined,
+  FilterList,
+  FilterOutlined,
+  SearchOffOutlined,
+  SearchOutlined,
+} from "@mui/icons-material";
+import {
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useMany } from "@refinedev/core";
+import { useList, useMany, useModal } from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -13,12 +26,15 @@ import {
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
+import { ProjectType } from "@type/ProjectType";
 import { WorkType } from "@type/WorkType";
 import Image from "next/image";
 import React from "react";
 
 export default function ActivityList() {
-  const { dataGridProps, search } = useDataGrid({
+  const { visible, show, close } = useModal();
+
+  const { dataGridProps, search, setFilters } = useDataGrid({
     syncWithLocation: false,
     meta: {
       populate: "*",
@@ -33,6 +49,8 @@ export default function ActivityList() {
       ];
     },
   });
+
+  const { loading } = dataGridProps;
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -115,6 +133,28 @@ export default function ActivityList() {
     []
   );
 
+  const { data: dataProject, isLoading } = useList<ProjectType>({
+    resource: "projects",
+  });
+
+  const projectList = dataProject?.data || [];
+
+  const handleSearch = (value: string) => {
+    if (value.length >= 3 || value === "") {
+      search({ name: value } as WorkType);
+    }
+  };
+
+  const handleFilterProject = (value: string | string[]) => {
+    setFilters([
+      {
+        field: "project",
+        value: value ? value : undefined,
+        operator: "eq",
+      },
+    ]);
+  };
+
   return (
     <List
       title={
@@ -125,21 +165,47 @@ export default function ActivityList() {
           justifyContent="space-between"
         >
           <Typography variant="h5">Daftar Kegiatan</Typography>
-          <TextField
-            variant="outlined"
-            placeholder="Cari"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Stack direction="row" spacing={2} alignItems="center">
+            <TextField
+              variant="outlined"
+              placeholder="Cari"
+              onChange={(e) => {
+                handleSearch(e.target.value);
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchOutlined />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <IconButton
+              color="primary"
+              onClick={() => {
+                show();
+              }}
+            >
+              <FilterList />
+            </IconButton>
+          </Stack>
         </Stack>
       }
     >
-      <DataGrid {...dataGridProps} columns={columns} autoHeight />
+      <DataGrid
+        {...dataGridProps}
+        columns={columns}
+        autoHeight
+        loading={loading}
+      />
+      <ModalFilter
+        open={visible}
+        onClose={close}
+        filterData={projectList}
+        multiple={true}
+        title="Proyek"
+        onFilter={handleFilterProject}
+      />
     </List>
   );
 }
