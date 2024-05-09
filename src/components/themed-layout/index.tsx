@@ -6,6 +6,8 @@ import React from "react";
 
 export const ThemedLayout = ({ children }: React.PropsWithChildren) => {
   return (
-    <ThemedLayoutV2 Header={() => <Header sticky />}>{children}</ThemedLayoutV2>
+    <ThemedLayoutV2 Header={() => <Header sticky />} Sider={() => <div></div>}>
+      {children}
+    </ThemedLayoutV2>
   );
 };

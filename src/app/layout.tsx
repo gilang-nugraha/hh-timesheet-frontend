@@ -32,49 +32,43 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Suspense>
-          <GitHubBanner />
           <RefineKbarProvider>
             <ColorModeContextProvider defaultMode={defaultMode}>
               <RefineSnackbarProvider>
-                <DevtoolsProvider>
-                  <Refine
-                    routerProvider={routerProvider}
-                    authProvider={authProvider}
-                    dataProvider={dataProvider}
-                    notificationProvider={notificationProvider}
-                    resources={[
-                      {
-                        name: "blog-posts",
-                        list: "/blog-posts",
-                        create: "/blog-posts/create",
-                        edit: "/blog-posts/edit/:id",
-                        show: "/blog-posts/show/:id",
-                        meta: {
-                          canDelete: true,
-                        },
+                <Refine
+                  routerProvider={routerProvider}
+                  authProvider={authProvider}
+                  dataProvider={dataProvider}
+                  notificationProvider={notificationProvider}
+                  resources={[
+                    {
+                      name: "works",
+                      list: "/works",
+                      options: {
+                        label: "Daftar Kegiatan",
                       },
-                      {
-                        name: "categories",
-                        list: "/categories",
-                        create: "/categories/create",
-                        edit: "/categories/edit/:id",
-                        show: "/categories/show/:id",
-                        meta: {
-                          canDelete: true,
-                        },
+                    },
+                    {
+                      name: "setting",
+                      list: "/setting",
+                      options: {
+                        label: "Pengaturan",
                       },
-                    ]}
-                    options={{
-                      syncWithLocation: true,
-                      warnWhenUnsavedChanges: true,
-                      useNewQueryKeys: true,
-                      projectId: "KwRbQT-n6AyFl-fc5n2k",
-                    }}
-                  >
-                    {children}
-                    <RefineKbar />
-                  </Refine>
-                </DevtoolsProvider>
+                      // meta: {
+                      //   canDelete: true,
+                      // },
+                    },
+                  ]}
+                  options={{
+                    syncWithLocation: false,
+                    useNewQueryKeys: true,
+                    warnWhenUnsavedChanges: true,
+                    projectId: "KwRbQT-n6AyFl-fc5n2k",
+                  }}
+                >
+                  {children}
+                  <RefineKbar />
+                </Refine>
               </RefineSnackbarProvider>
             </ColorModeContextProvider>
           </RefineKbarProvider>

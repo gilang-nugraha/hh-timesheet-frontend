@@ -1,6 +1,10 @@
+import HeaderMenu from "@components/menu";
+import Menu from "@components/menu";
 import { ColorModeContext } from "@contexts/color-mode";
+import { LogoutOutlined } from "@mui/icons-material";
 import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
+import { Container } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
@@ -9,6 +13,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { useGetIdentity } from "@refinedev/core";
 import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
+import Image from "next/image";
 import React, { useContext } from "react";
 
 type IUser = {
@@ -25,56 +30,47 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { data: user } = useGetIdentity<IUser>();
 
   return (
-    <AppBar position={sticky ? "sticky" : "relative"}>
-      <Toolbar>
-        <Stack
-          direction="row"
-          width="100%"
-          justifyContent="flex-end"
-          alignItems="center"
-        >
-          <HamburgerMenu />
+    <Stack direction={"column"} style={{ backgroundColor: "white" }}>
+      <AppBar position={sticky ? "sticky" : "relative"}>
+        <Toolbar>
+          <Stack
+            direction="row"
+            width="100%"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <Image
+              src="/logo.png"
+              width={120}
+              height={50}
+              layout="fixed"
+              alt="logo"
+            />
+          </Stack>
           <Stack
             direction="row"
             width="100%"
             justifyContent="flex-end"
             alignItems="center"
           >
-            <IconButton
-              color="inherit"
-              onClick={() => {
-                setMode();
-              }}
+            <Stack
+              direction="row"
+              width="100%"
+              justifyContent="flex-end"
+              alignItems="center"
             >
-              {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
-            </IconButton>
-
-            {(user?.avatar || user?.name) && (
-              <Stack
-                direction="row"
-                gap="16px"
-                alignItems="center"
-                justifyContent="center"
+              <IconButton
+                onClick={() => {
+                  setMode();
+                }}
               >
-                {user?.name && (
-                  <Typography
-                    sx={{
-                      display: {
-                        xs: "none",
-                        sm: "inline-block",
-                      },
-                    }}
-                    variant="subtitle2"
-                  >
-                    {user?.name}
-                  </Typography>
-                )}
-                <Avatar src={user?.avatar} alt={user?.name} />
-              </Stack>
-            )}
+                <LogoutOutlined />
+              </IconButton>
+            </Stack>
           </Stack>
-        </Stack>
-      </Toolbar>
-    </AppBar>
+        </Toolbar>
+      </AppBar>
+      <HeaderMenu />
+    </Stack>
   );
 };

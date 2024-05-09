@@ -5,6 +5,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { RefineThemes } from "@refinedev/mui";
+import { TypographyVariantsOptions, createTheme } from "@mui/material/styles";
 import Cookies from "js-cookie";
 import React, {
   PropsWithChildren,
@@ -12,6 +13,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import "@styles/font/Nunito.css";
 
 type ColorModeContextType = {
   mode: string;
@@ -24,6 +26,22 @@ export const ColorModeContext = createContext<ColorModeContextType>(
 
 type ColorModeContextProviderProps = {
   defaultMode?: string;
+};
+
+const typography: TypographyVariantsOptions = {
+  fontFamily: [
+    "Nunito",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    '"Segoe UI"',
+    "Roboto",
+    '"Helvetica Neue"',
+    "Arial",
+    "sans-serif",
+    '"Apple Color Emoji"',
+    '"Segoe UI Emoji"',
+    '"Segoe UI Symbol"',
+  ].join(","),
 };
 
 export const ColorModeContextProvider: React.FC<
@@ -52,6 +70,34 @@ export const ColorModeContextProvider: React.FC<
     Cookies.set("theme", nextTheme);
   };
 
+  const theme = createTheme({
+    // ...(mode === "light" ? RefineThemes.Blue : RefineThemes.BlueDark),
+    palette: {
+      background: {
+        default: "#F7F8FB",
+      },
+      primary: {
+        main: "#F15858",
+      },
+      secondary: {
+        main: "#2775EC",
+        light: "#F0F6FF",
+      },
+    },
+    typography: {
+      ...typography,
+    },
+    components: {
+      MuiAppBar: {
+        styleOverrides: {
+          colorPrimary: {
+            backgroundColor: "white",
+          },
+        },
+      },
+    },
+  });
+
   return (
     <ColorModeContext.Provider
       value={{
@@ -59,10 +105,7 @@ export const ColorModeContextProvider: React.FC<
         mode,
       }}
     >
-      <ThemeProvider
-        // you can change the theme colors here. example: mode === "light" ? RefineThemes.Magenta : RefineThemes.MagentaDark
-        theme={mode === "light" ? RefineThemes.Blue : RefineThemes.BlueDark}
-      >
+      <ThemeProvider theme={theme}>
         <CssBaseline />
         <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
         {children}
