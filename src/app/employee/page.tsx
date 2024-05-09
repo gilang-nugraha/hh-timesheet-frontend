@@ -1,46 +1,40 @@
 "use client";
 
-import ModalFilter from "@components/reuseable/ModalFIlter";
+import AddEmployeeCard from "@components/reuseable/AddEmployeeCard";
 import {
-  Filter1Outlined,
+  AddCircle,
+  AddCircleOutline,
   FilterList,
-  FilterOutlined,
-  SearchOffOutlined,
   SearchOutlined,
 } from "@mui/icons-material";
 import {
+  Button,
   IconButton,
   InputAdornment,
+  Modal,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useApiUrl, useCustom, useModal } from "@refinedev/core";
 import {
-  useApiUrl,
-  useCustom,
-  useList,
-  useMany,
-  useModal,
-} from "@refinedev/core";
-import {
-  DateField,
   DeleteButton,
   EditButton,
   List,
-  MarkdownField,
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
-import { ProjectType } from "@type/ProjectType";
-import { RoleType } from "@type/UserType";
+import { RoleType, UserType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
-import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 
 export default function ActivityList() {
+  const { visible, show, close } = useModal();
+  const [selEmployee, setSelEmployee] = useState<UserType>();
+
   const APIURL = useApiUrl();
-  const { data: roleData, isLoading: loadingRole } = useCustom({
+  const { data: roleData } = useCustom({
     url: `${APIURL}/users-permissions/roles`,
     method: "get",
   });
@@ -48,7 +42,7 @@ export default function ActivityList() {
     (role: RoleType) => role.name === "Authenticated"
   );
 
-  const { dataGridProps, search, setFilters, filters } = useDataGrid({
+  const { dataGridProps, search, setFilters } = useDataGrid({
     syncWithLocation: false,
     queryOptions: {
       enabled: !!employeeRole,
@@ -70,6 +64,13 @@ export default function ActivityList() {
         field: "username",
         flex: 1,
         headerName: "Nama Karyawan",
+        minWidth: 200,
+      },
+
+      {
+        field: "email",
+        flex: 1,
+        headerName: "Email Karyawan",
         minWidth: 200,
       },
       {
@@ -97,7 +98,13 @@ export default function ActivityList() {
         renderCell: function render({ row }) {
           return (
             <>
-              <EditButton hideText recordItemId={row.id} />
+              <EditButton
+                hideText
+                onClick={() => {
+                  setSelEmployee(row);
+                  show();
+                }}
+              />
               <ShowButton hideText recordItemId={row.id} />
               <DeleteButton hideText recordItemId={row.id} />
             </>
@@ -116,22 +123,7 @@ export default function ActivityList() {
       search({ name: value } as WorkType);
     }
   };
-
-  const handleFilterProject = (value: string | string[]) => {
-    setFilters([
-      {
-        field: "project",
-        value: value ? value : undefined,
-        operator: "eq",
-      },
-    ]);
-  };
-
   const { loading } = dataGridProps;
-
-  if (loadingRole || !employeeRole) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <List
@@ -142,9 +134,20 @@ export default function ActivityList() {
           alignItems="center"
           justifyContent="space-between"
         >
-          <Typography variant="h6" fontWeight={"bold"}>
-            Daftar Kegiatan
-          </Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography variant="h6" fontWeight={"bold"}>
+              Daftar Kegiatan
+            </Typography>
+
+            <Button
+              color="secondary"
+              variant="outlined"
+              startIcon={<AddCircleOutline />}
+              onClick={show}
+            >
+              Tambah Karyawan
+            </Button>
+          </Stack>
           <Stack direction="row" spacing={2} alignItems="center">
             <TextField
               variant="outlined"
@@ -160,13 +163,6 @@ export default function ActivityList() {
                 ),
               }}
             />
-            <IconButton
-              color="primary"
-              // onClick={() => {
-              // }}
-            >
-              <FilterList />
-            </IconButton>
           </Stack>
         </Stack>
       }
@@ -177,6 +173,21 @@ export default function ActivityList() {
         autoHeight
         loading={loading}
       />
+      <Modal
+        open={visible}
+        onClose={() => {
+          close();
+          setSelEmployee(undefined);
+        }}
+      >
+        <AddEmployeeCard
+          initialValue={selEmployee}
+          onClose={() => {
+            close();
+            setSelEmployee(undefined);
+          }}
+        />
+      </Modal>
     </List>
   );
 }

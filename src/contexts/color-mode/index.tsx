@@ -107,8 +107,6 @@ export const ColorModeContextProvider: React.FC<
           root: {
             borderRadius: 8,
             textTransform: "capitalize",
-            paddingTop: 12,
-            paddingBottom: 12,
           },
         },
       },

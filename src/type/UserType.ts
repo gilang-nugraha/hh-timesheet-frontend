@@ -1,10 +1,11 @@
 export type UserType = {
-  id: string;
+  id?: string;
   username: string;
   email: string;
-  password: string;
-  role: RoleType;
+  password?: string;
+  role: number | RoleType;
   rate: number;
+  confirmed?: boolean;
 };
 
 export type RoleType = {
