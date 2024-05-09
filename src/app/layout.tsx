@@ -58,7 +58,7 @@ export default function RootLayout({
                       },
                     },
                     {
-                      name: "setting",
+                      name: "work-time",
                       list: "/setting",
                       options: {
                         label: "Pengaturan",
