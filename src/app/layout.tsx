@@ -10,6 +10,7 @@ import React, { Suspense } from "react";
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { authProvider } from "@providers/auth-provider";
 import { dataProvider } from "@providers/data-provider";
+import { aclProvider } from "@providers/acl-provider";
 
 export const metadata: Metadata = {
   title: "Refine",
@@ -39,6 +40,7 @@ export default function RootLayout({
                   routerProvider={routerProvider}
                   authProvider={authProvider}
                   dataProvider={dataProvider}
+                  accessControlProvider={aclProvider}
                   notificationProvider={notificationProvider}
                   resources={[
                     {
@@ -46,6 +48,13 @@ export default function RootLayout({
                       list: "/works",
                       options: {
                         label: "Daftar Kegiatan",
+                      },
+                    },
+                    {
+                      name: "users",
+                      list: "/employee",
+                      options: {
+                        label: "Daftar Karyawan",
                       },
                     },
                     {

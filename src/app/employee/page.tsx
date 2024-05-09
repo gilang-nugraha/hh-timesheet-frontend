@@ -16,7 +16,13 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useList, useMany, useModal } from "@refinedev/core";
+import {
+  useApiUrl,
+  useCustom,
+  useList,
+  useMany,
+  useModal,
+} from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -27,89 +33,61 @@ import {
   useDataGrid,
 } from "@refinedev/mui";
 import { ProjectType } from "@type/ProjectType";
+import { RoleType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export default function ActivityList() {
-  const { visible, show, close } = useModal();
+  const APIURL = useApiUrl();
+  const { data: roleData, isLoading: loadingRole } = useCustom({
+    url: `${APIURL}/users-permissions/roles`,
+    method: "get",
+  });
+  const employeeRole: RoleType = roleData?.data?.roles?.find(
+    (role: RoleType) => role.name === "Authenticated"
+  );
 
-  const { dataGridProps, search, setFilters } = useDataGrid({
+  const { dataGridProps, search, setFilters, filters } = useDataGrid({
     syncWithLocation: false,
-    meta: {
-      populate: "*",
+    queryOptions: {
+      enabled: !!employeeRole,
     },
-    onSearch: (values: WorkType) => {
-      return [
+    filters: {
+      defaultBehavior: "replace",
+      permanent: [
         {
-          field: "name",
-          operator: "contains",
-          value: values.name,
+          field: "role",
+          operator: "eq",
+          value: employeeRole?.id,
         },
-      ];
+      ],
     },
   });
-
-  const { loading } = dataGridProps;
-
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
-        field: "name",
+        field: "username",
         flex: 1,
-        headerName: "Judul Kegiatan",
+        headerName: "Nama Karyawan",
         minWidth: 200,
       },
       {
-        field: "project.name",
+        field: "rate",
         flex: 1,
-        headerName: "Nama Proyek",
+        headerName: "Rate /jam",
         minWidth: 250,
-        valueGetter: (params) => params.row.project.name,
-      },
-      {
-        field: "employee.username",
-        flex: 1,
-        headerName: "Nama Karyawan",
-        minWidth: 250,
-        valueGetter: (params) => params.row.employee.username,
-      },
-      {
-        field: "startDate",
-        flex: 1,
-        headerName: "Tanggal Mulai",
-        minWidth: 250,
-        renderCell: function render({ value }) {
-          return <DateField value={value} format="DD MMMM YYYY" />;
-        },
-      },
-      {
-        field: "endDate",
-        flex: 1,
-        headerName: "Tanggal Berakhir",
-        minWidth: 250,
-        renderCell: function render({ value }) {
-          return <DateField value={value} format="DD MMMM YYYY" />;
-        },
-      },
-      {
-        field: "timeStart",
-        flex: 1,
-        headerName: "Waktu Mulai",
-        minWidth: 250,
-        sortable: false,
-        renderCell: function render({ value, row }) {
-          return <DateField value={row.startDate} format="HH:mm" />;
-        },
-      },
-      {
-        field: "timeEnd",
-        flex: 1,
-        headerName: "Waktu Berakhir",
-        minWidth: 250,
-        sortable: false,
-        renderCell: function render({ value, row }) {
-          return <DateField value={row.endDate} format="HH:mm" />;
+        renderCell: function render({ row }) {
+          return (
+            <Typography variant="body2">
+              {new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(row.rate)}
+            </Typography>
+          );
         },
       },
       {
@@ -133,12 +111,6 @@ export default function ActivityList() {
     []
   );
 
-  const { data: dataProject, isLoading } = useList<ProjectType>({
-    resource: "projects",
-  });
-
-  const projectList = dataProject?.data || [];
-
   const handleSearch = (value: string) => {
     if (value.length >= 3 || value === "") {
       search({ name: value } as WorkType);
@@ -154,6 +126,12 @@ export default function ActivityList() {
       },
     ]);
   };
+
+  const { loading } = dataGridProps;
+
+  if (loadingRole || !employeeRole) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <List
@@ -184,9 +162,8 @@ export default function ActivityList() {
             />
             <IconButton
               color="primary"
-              onClick={() => {
-                show();
-              }}
+              // onClick={() => {
+              // }}
             >
               <FilterList />
             </IconButton>
@@ -199,15 +176,6 @@ export default function ActivityList() {
         columns={columns}
         autoHeight
         loading={loading}
-      />
-      <ModalFilter
-        open={visible}
-        onClose={close}
-        filterData={projectList}
-        multiple={true}
-        inputTitle="Proyek"
-        modalTitle="Filter"
-        onFilter={handleFilterProject}
       />
     </List>
   );
