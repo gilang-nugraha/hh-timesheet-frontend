@@ -7,7 +7,7 @@ export const aclProvider: AccessControlProvider = {
   can: async ({ resource, action }: CanParams) => {
     const user = Cookies.get("user");
     const userRole = user ? JSON.parse(user).role : null;
-    if (resource === "activity" && userRole !== "manager") {
+    if (resource === "users" && userRole !== "manager") {
       return {
         can: false,
         reason: "Unauthorized",
