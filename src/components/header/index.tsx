@@ -31,7 +31,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
 
   return (
     <Stack direction={"column"} style={{ backgroundColor: "white" }}>
-      <AppBar position={sticky ? "sticky" : "relative"}>
+      <AppBar position={sticky ? "sticky" : "relative"} elevation={3}>
         <Toolbar>
           <Stack
             direction="row"
