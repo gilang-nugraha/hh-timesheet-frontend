@@ -21,7 +21,8 @@ import { useState } from "react";
 
 interface Props<T extends { id: string | number }> {
   open: boolean;
-  title: string;
+  modalTitle: string;
+  inputTitle: string;
   multiple: boolean;
   onClose: () => void;
   filterData: T[];
@@ -33,12 +34,13 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  minWidth: 400,
+  minWidth: 600,
 };
 
 const ModalFilter = <T extends { id: string | number; name: string }>({
   open,
-  title,
+  modalTitle,
+  inputTitle,
   onClose,
   multiple,
   filterData,
@@ -47,6 +49,15 @@ const ModalFilter = <T extends { id: string | number; name: string }>({
   const [selected, setSelected] = useState<string[] | string>(
     multiple ? [] : ""
   );
+
+  const handleChipDelete = (removeValue: string) => {
+    setSelected((prevSelected) => {
+      const selectedArray = Array.isArray(prevSelected)
+        ? prevSelected
+        : [prevSelected];
+      return selectedArray.filter((value) => value !== removeValue);
+    });
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -60,7 +71,7 @@ const ModalFilter = <T extends { id: string | number; name: string }>({
               justifyContent="space-between"
             >
               <Typography variant="h6" fontWeight={"bold"}>
-                Filter
+                {modalTitle}
               </Typography>
               <IconButton onClick={onClose}>
                 <CloseOutlined />
@@ -77,13 +88,13 @@ const ModalFilter = <T extends { id: string | number; name: string }>({
           }}
         >
           <FormControl required fullWidth>
-            <InputLabel id="filter-select-label">{title}</InputLabel>
+            <InputLabel id="filter-select-label">{inputTitle}</InputLabel>
             <Select
               variant="outlined"
               labelId="filter-select-label"
               id="filter-select"
               required
-              label={`${title} *`}
+              label={`${inputTitle} *`}
               multiple={multiple}
               fullWidth
               value={selected}
@@ -102,7 +113,11 @@ const ModalFilter = <T extends { id: string | number; name: string }>({
                         return (
                           <Chip
                             key={value}
+                            onDelete={() => handleChipDelete(value)}
                             label={selectedItem ? selectedItem.name : ""}
+                            onMouseDown={(event) => {
+                              event.stopPropagation();
+                            }}
                           />
                         );
                       })}
@@ -126,6 +141,7 @@ const ModalFilter = <T extends { id: string | number; name: string }>({
             variant="text"
             onClick={() => {
               setSelected(multiple ? [] : "");
+              onFilter("");
             }}
           >
             Hapus Filter

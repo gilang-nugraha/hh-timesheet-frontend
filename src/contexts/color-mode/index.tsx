@@ -95,6 +95,23 @@ export const ColorModeContextProvider: React.FC<
           },
         },
       },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: "capitalize",
+            paddingTop: 12,
+            paddingBottom: 12,
+          },
+        },
+      },
     },
   });
 

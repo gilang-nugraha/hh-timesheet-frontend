@@ -203,7 +203,8 @@ export default function ActivityList() {
         onClose={close}
         filterData={projectList}
         multiple={true}
-        title="Proyek"
+        inputTitle="Proyek"
+        modalTitle="Filter"
         onFilter={handleFilterProject}
       />
     </List>
