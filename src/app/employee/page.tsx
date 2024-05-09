@@ -136,7 +136,7 @@ export default function ActivityList() {
         >
           <Stack direction="row" spacing={2} alignItems="center">
             <Typography variant="h6" fontWeight={"bold"}>
-              Daftar Kegiatan
+              Daftar Karyawan
             </Typography>
 
             <Button

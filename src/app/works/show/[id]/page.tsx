@@ -10,8 +10,10 @@ import {
   TextFieldComponent as TextField,
 } from "@refinedev/mui";
 
-export default function BlogPostShow() {
-  const { queryResult } = useShow({});
+export default function WorkShow() {
+  const { queryResult } = useShow({
+    resource: "works",
+  });
 
   const { data, isLoading } = queryResult;
 

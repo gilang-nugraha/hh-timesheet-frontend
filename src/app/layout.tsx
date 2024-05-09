@@ -46,6 +46,7 @@ export default function RootLayout({
                     {
                       name: "works",
                       list: "/works",
+                      show: "/works/show/:id",
                       options: {
                         label: "Daftar Kegiatan",
                       },
@@ -53,6 +54,7 @@ export default function RootLayout({
                     {
                       name: "users",
                       list: "/employee",
+                      show: "/works/show/:id",
                       options: {
                         label: "Daftar Karyawan",
                       },
@@ -63,9 +65,6 @@ export default function RootLayout({
                       options: {
                         label: "Pengaturan",
                       },
-                      // meta: {
-                      //   canDelete: true,
-                      // },
                     },
                   ]}
                   options={{
