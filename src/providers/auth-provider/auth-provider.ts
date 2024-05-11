@@ -36,11 +36,17 @@ export const authProvider: AuthBindings = {
       axiosInstance.defaults.headers.common = {
         Authorization: `Bearer ${data.jwt}`,
       };
-
-      return {
-        success: true,
-        redirectTo: "/",
-      };
+      if (user?.role.name === "Manager") {
+        return {
+          success: true,
+          redirectTo: "/works",
+        };
+      } else {
+        return {
+          success: true,
+          redirectTo: "/timesheet",
+        };
+      }
     }
     return {
       success: false,

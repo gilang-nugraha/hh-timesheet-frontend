@@ -64,6 +64,7 @@ export default function TimesheetPage() {
     if (userId) {
     }
   }, [userId]);
+
   const { dataGridProps, search, setFilters } = useDataGrid({
     resource: "works",
     syncWithLocation: false,

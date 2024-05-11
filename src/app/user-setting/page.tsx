@@ -15,10 +15,12 @@ import {
 import { BaseRecord, CanAccess, useApiUrl, useCustom } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { SettingType } from "@type/SettingType";
+import { UserRequestType, UserType } from "@type/UserType";
+import { getUserfromClientCookies } from "@utility/user-utility";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -31,45 +33,38 @@ const style = {
 };
 
 export default function SettingPage() {
-  const APIURL = useApiUrl();
-  const { data, isLoading } = useCustom<BaseRecord>({
-    url: `${APIURL}/work-time`,
-    method: "get",
-    queryOptions: {
-      enabled: true,
-    },
-  });
+  const user = useMemo(() => getUserfromClientCookies(), []);
+  const userId = user?.id;
 
-  const settingData: SettingType = useMemo(() => {
-    return data?.data?.data;
-  }, [data]);
+  useEffect(() => {
+    if (userId) {
+    }
+  }, [userId]);
+
   const {
     refineCore: { onFinish, formLoading },
     register,
-    control,
     handleSubmit,
     formState: { errors },
   } = useForm({
     refineCoreProps: {
       action: "edit",
       redirect: false,
+      resource: "users",
+      id: userId,
     },
-    defaultValues: settingData,
   });
 
-  const onFinishHandler = (data: SettingType) => {
-    data.startTime =
-      settingData?.startTime !== data.startTime
-        ? data.startTime + ":00.000"
-        : settingData?.startTime;
-    data.endTime =
-      settingData?.endTime !== data.endTime
-        ? data.endTime + ":00.000"
-        : settingData?.endTime;
-    onFinish(data);
+  const onFinishHandler = (data: UserRequestType) => {
+    if (!data.password) {
+      const { password, ...requestData } = data;
+      onFinish(requestData);
+    } else {
+      onFinish(data);
+    }
   };
 
-  if (settingData) {
+  if (userId) {
     return (
       <CanAccess
         resource="user-setting"
@@ -77,7 +72,11 @@ export default function SettingPage() {
         fallback={<Typography>No access</Typography>}
       >
         <Card sx={style}>
-          <form onSubmit={handleSubmit(onFinishHandler)}>
+          <form
+            onSubmit={handleSubmit((data) =>
+              onFinishHandler(data as UserRequestType)
+            )}
+          >
             <CardHeader
               title={
                 <Stack
@@ -104,35 +103,34 @@ export default function SettingPage() {
                 <FormControl fullWidth>
                   <TextField
                     variant="outlined"
-                    label="Jam Mulai Bekerja"
-                    type="time"
-                    {...register("startTime")}
-                    defaultValue={settingData?.startTime}
-                    error={!!errors.startTime}
-                    helperText={errors.startTime?.message}
+                    label="Nama"
+                    placeholder="Username"
+                    defaultValue={user?.username}
+                    {...register("username")}
+                    error={!!errors.username}
                   />
                 </FormControl>
                 <FormControl fullWidth>
                   <TextField
                     variant="outlined"
-                    label="Jam Selesai Bekerja"
-                    type="time"
-                    {...register("endTime")}
-                    defaultValue={settingData?.endTime}
-                    error={!!errors.endTime}
-                    helperText={errors.endTime?.message}
-                  />
-                </FormControl>
-                <FormControl fullWidth>
-                  <TextField
-                    variant="outlined"
-                    label="Persen Rate"
+                    label="Rate"
                     type="number"
-                    {...register("overtimeRate")}
-                    defaultValue={settingData?.overtimeRate}
-                    error={!!errors.overtimeRate}
-                    helperText={errors.overtimeRate?.message}
-                    InputProps={{ endAdornment: <PercentOutlined /> }}
+                    placeholder="Rate"
+                    defaultValue={user?.rate}
+                    {...register("rate")}
+                    error={!!errors.rate}
+                    InputProps={{ endAdornment: <Typography>/Jam</Typography> }}
+                  />
+                </FormControl>
+                <FormControl fullWidth>
+                  <TextField
+                    variant="outlined"
+                    label="Password"
+                    autoComplete="off"
+                    placeholder="Password"
+                    {...register("password")}
+                    error={!!errors.password}
+                    type="password"
                   />
                 </FormControl>
               </Stack>
