@@ -6,6 +6,7 @@ import AddWorkCard from "@components/reuseable/AddWorkCard";
 import ConfirmationDialog from "@components/reuseable/ConfirmationDialog";
 import EditWorkCard from "@components/reuseable/EditWorkCard";
 import ModalFilter from "@components/reuseable/ModalFIlter";
+import PDFWorkTemplate from "@components/reuseable/PDFWorkTemplate";
 import {
   AddCircleOutline,
   EditOutlined,
@@ -15,15 +16,12 @@ import {
   QuestionMarkOutlined,
   SearchOutlined,
   UpdateOutlined,
-  WarningOutlined,
 } from "@mui/icons-material";
 import {
   Backdrop,
-  Box,
   Button,
   CircularProgress,
   Divider,
-  Icon,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -31,16 +29,12 @@ import {
   Paper,
   Popper,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { CalendarIcon } from "@mui/x-date-pickers";
 import {
   BaseKey,
   CanAccess,
@@ -50,13 +44,7 @@ import {
   useOne,
   useUpdateMany,
 } from "@refinedev/core";
-import {
-  DateField,
-  DeleteButton,
-  EditButton,
-  List,
-  useDataGrid,
-} from "@refinedev/mui";
+import { DateField, DeleteButton, List, useDataGrid } from "@refinedev/mui";
 import { ProjectType } from "@type/ProjectType";
 import { UserType } from "@type/UserType";
 import { SummaryTimesheetType, WorkType } from "@type/WorkType";
@@ -64,20 +52,17 @@ import {
   formatDurationToIndonesiaTime,
   formatToIndonesianCurrency,
 } from "@utility/calculate-timesheet";
+import { exportToExcel } from "@utility/export-table";
 import { getUserfromClientCookies } from "@utility/user-utility";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import _ from "lodash";
+import type { DateRange } from "mui-daterange-picker-plus";
+import { PickerModal } from "mui-daterange-picker-plus";
 import { useParams } from "next/navigation";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import { PickerBase, PickerModal } from "mui-daterange-picker-plus";
-import type { DateRange } from "mui-daterange-picker-plus";
-import { CalendarIcon } from "@mui/x-date-pickers";
-import { exportToExcel } from "@utility/export-table";
-import Image from "next/image";
-import PDFWorkTemplate from "@components/reuseable/PDFWorkTemplate";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -599,7 +584,7 @@ export default function EmployeeTimesheetPage() {
                   anchorEl={anchorEl}
                   placement="bottom-end"
                   sx={{
-                    zIndex: 9999,
+                    zIndex: 1,
                   }}
                 >
                   <Paper>

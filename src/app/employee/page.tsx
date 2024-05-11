@@ -1,15 +1,9 @@
 "use client";
 
 import AddEmployeeCard from "@components/reuseable/AddEmployeeCard";
-import {
-  AddCircle,
-  AddCircleOutline,
-  FilterList,
-  SearchOutlined,
-} from "@mui/icons-material";
+import { AddCircleOutline, SearchOutlined } from "@mui/icons-material";
 import {
   Button,
-  IconButton,
   InputAdornment,
   Modal,
   Stack,

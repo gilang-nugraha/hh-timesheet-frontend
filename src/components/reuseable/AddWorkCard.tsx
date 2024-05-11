@@ -65,8 +65,6 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
     return initialUser || getUserfromClientCookies();
   }, [initialUser]);
 
-  console.log("initialUser", initialUser);
-
   // for admin testing purpose
   // const { options: userSelectProps } = useSelect({
   //   resource: "users",
