@@ -22,9 +22,9 @@ const CustomMenuItem = ({ name, label, route, selectedKey }: MenuProps) => {
   return (
     <Button
       style={{
-        color: selectedKey === route ? "primary.main" : "inherit",
-        fontWeight: selectedKey === route ? "bold" : "normal",
-        borderBottom: selectedKey === route ? "2px solid" : "none",
+        color: selectedKey === name ? "primary.main" : "inherit",
+        fontWeight: selectedKey === name ? "bold" : "normal",
+        borderBottom: selectedKey === name ? "2px solid" : "none",
         borderRadius: 0,
         textTransform: "capitalize",
       }}
@@ -52,7 +52,6 @@ const HeaderMenu: React.FC<LayoutProps> = ({ children }) => {
             resource={item.name.toLowerCase()}
             action="list"
             params={{ resource: item }}
-            fallback={<Fragment />}
           >
             <CustomMenuItem
               name={item.key}
