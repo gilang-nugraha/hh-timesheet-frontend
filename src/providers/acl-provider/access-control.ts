@@ -6,19 +6,35 @@ export const aclProvider: AccessControlProvider = {
     const userCookie = Cookies.get("user");
     const user = JSON.parse(userCookie || "{}");
     const userRole = user ? user.role : null;
-    if (resource === "works" && userRole?.name === "Manager") {
+
+    //allow ACL for Manager
+    if (
+      (resource === "works" && userRole?.name === "Manager") ||
+      (resource === "users" && userRole?.name === "Manager") ||
+      (resource === "work-time" && userRole?.name === "Manager") ||
+      (resource === "timesheet" && userRole?.name === "Manager")
+    ) {
+      console.log("aclhere3");
+
       return {
         can: true,
-      };
-    }
-    if (resource === "works" && userRole?.name !== "Manager") {
-      return {
-        can: false,
-        redirectTo: `/works/show/${user?.id}`,
+        redirectTo: undefined,
       };
     }
 
-    // Otherwise, allow access
-    return { can: false };
+    //allow ACL for Employee
+    if (
+      (resource === "user-setting" && userRole?.name !== "Manager") ||
+      (resource === "timesheet" && userRole?.name !== "Manager")
+    ) {
+      console.log("aclhere3");
+
+      return {
+        can: true,
+        redirectTo: undefined,
+      };
+    }
+    // Otherwise, disable access
+    return { can: false, redirectTo: undefined };
   },
 };
