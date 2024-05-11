@@ -120,7 +120,6 @@ export default function WorkPage() {
           return (
             <>
               <EditButton hideText recordItemId={row.id} />
-              <ShowButton hideText recordItemId={row.id} />
               <DeleteButton hideText recordItemId={row.id} />
             </>
           );
@@ -208,7 +207,7 @@ export default function WorkPage() {
         <ModalFilter
           open={visible}
           onClose={close}
-          filterData={projectList}
+          filterData={projectList as { id: string; name: string }[]}
           multiple={true}
           inputTitle="Proyek"
           modalTitle="Filter"

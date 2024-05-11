@@ -50,9 +50,10 @@ const style = {
 
 interface Props {
   initialValue: WorkType;
+  initialUser?: UserType;
   onClose: () => void;
 }
-const EditWorkCard = ({ initialValue, onClose }: Props) => {
+const EditWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
   const invalidate = useInvalidate();
 
   const { show, close, visible } = useModal();
@@ -63,8 +64,11 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
     initialValue?.project as ProjectType
   );
   const [addProject, setAddProject] = useState<ProjectType>();
+
   const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
-  const user = useMemo(() => getUserfromClientCookies(), []);
+  const user = useMemo(() => {
+    return initialUser || getUserfromClientCookies();
+  }, [initialUser]);
 
   const { options: userSelectProps } = useSelect({
     resource: "users",
@@ -268,40 +272,6 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
                     </FormControl>
                   </Grid>
                 </Grid>
-                {userRole?.name === "Manager" && (
-                  <FormControl fullWidth>
-                    <InputLabel id="filter-select-label">
-                      Pilih Karyawan *
-                    </InputLabel>
-
-                    <Select
-                      labelId="filter-select-label"
-                      id="filter-select"
-                      {...register("employee", {
-                        required: "Wajib diisi",
-                      })}
-                      {...userSelectProps}
-                      required
-                      value={getValues("employee")}
-                      fullWidth
-                      variant="outlined"
-                      label="Pilih Karyawan *"
-                      error={!!(errors.employee && errors.employee.message)}
-                    >
-                      {userOptions?.map((option) => {
-                        return (
-                          <MenuItem
-                            key={option.value}
-                            value={option.value}
-                            disabled={option.value === getValues("employee")}
-                          >
-                            {option.label}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-                )}
                 <FormControl fullWidth>
                   <TextField
                     {...register("name", {

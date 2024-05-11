@@ -54,6 +54,7 @@ export default function RootLayout({
                     {
                       name: "users",
                       list: "/employee",
+                      show: "/employee/show/:id",
                       options: {
                         label: "Daftar Karyawan",
                       },

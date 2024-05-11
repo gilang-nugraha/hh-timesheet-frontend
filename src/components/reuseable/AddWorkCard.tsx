@@ -105,7 +105,6 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
       resource: "timesheet",
       redirect: false,
       onMutationSuccess: () => {
-        invalidate({ resource: "works", invalidates: ["list"] });
         onClose();
       },
     },
@@ -289,7 +288,6 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                       error={!!(errors.employee && errors.employee.message)}
                     >
                       {userOptions?.map((option) => {
-                        console.log("option", option);
                         return (
                           <MenuItem
                             key={option.value}
@@ -323,7 +321,6 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                       const id = val?.id || "";
                       setSelProject(val);
                       setValue("project", id);
-                      console.log("asd", val);
                     }}
                     onAdd={(value) => {
                       setAddProject({ name: value });
