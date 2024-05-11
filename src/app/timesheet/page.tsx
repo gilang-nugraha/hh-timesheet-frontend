@@ -24,23 +24,21 @@ import {
   DeleteButton,
   EditButton,
   List,
-  ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
 import { ProjectType } from "@type/ProjectType";
 import { WorkType } from "@type/WorkType";
 import {
-  formatMillisecondsToHHMM,
-  formatToIndonesianCurrency,
   formatDurationToIndonesiaTime,
+  formatToIndonesianCurrency,
 } from "@utility/calculate-timesheet";
 import { getUserfromClientCookies } from "@utility/user-utility";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import React, { useEffect, useMemo, useState } from "react";
 import _ from "lodash";
+import React, { useEffect, useMemo, useState } from "react";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -226,9 +224,18 @@ export default function TimesheetPage() {
         renderCell: function render({ row }) {
           return (
             <>
-              <EditButton hideText recordItemId={row.id} />
-              <ShowButton hideText recordItemId={row.id} />
-              <DeleteButton hideText recordItemId={row.id} />
+              <EditButton
+                hideText
+                recordItemId={row.id}
+                onClick={() => alert("saadad")}
+              />
+              <DeleteButton
+                hideText
+                recordItemId={row.id}
+                resource="works"
+                invalidates={["list"]}
+                disabled={false}
+              />
             </>
           );
         },
