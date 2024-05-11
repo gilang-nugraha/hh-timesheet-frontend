@@ -377,7 +377,7 @@ export default function TimesheetPage() {
   if (!isLoading) {
     return (
       <CanAccess
-        resource="employee"
+        resource="users"
         action="list"
         fallback={<Typography>No access</Typography>}
       >
