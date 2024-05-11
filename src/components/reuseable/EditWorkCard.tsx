@@ -82,8 +82,6 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
 
   const userOptions = userSelectProps || [];
 
-  const defaultValues: WorkType = initialValue;
-
   const {
     refineCore: { onFinish, formLoading },
     register,
@@ -92,18 +90,19 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
     formState: { errors },
     getValues,
     setValue,
+    reset,
   } = useForm({
     refineCoreProps: {
-      ...(initialValue && { id: initialValue.id }),
       action: "edit",
       resource: "timesheet",
       redirect: false,
+      id: initialValue?.id,
       onMutationSuccess: () => {
+        reset();
         invalidate({ resource: "works", invalidates: ["list"] });
         onClose();
       },
     },
-    defaultValues: defaultValues,
   });
 
   const onFinishHandler = (data: WorkType) => {
@@ -156,12 +155,12 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
     onFinish(requestData);
   };
 
-  console.log(initialValue);
-
   return (
     <>
       <Card sx={style}>
-        <form onSubmit={handleSubmit(onFinishHandler)}>
+        <form
+          onSubmit={handleSubmit((data) => onFinishHandler(data as WorkType))}
+        >
           <CardHeader
             title={
               <Stack
@@ -253,7 +252,7 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
                       <Controller
                         name="endTime"
                         control={control}
-                        defaultValue={initialValue?.startDate}
+                        defaultValue={initialValue?.endDate}
                         render={({ field }) => (
                           <TimePicker
                             label="Jam Berakhir *"
@@ -290,7 +289,6 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
                       error={!!(errors.employee && errors.employee.message)}
                     >
                       {userOptions?.map((option) => {
-                        console.log("option", option);
                         return (
                           <MenuItem
                             key={option.value}
@@ -310,8 +308,8 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
                       required: "Wajib diisi",
                     })}
                     error={!!(errors.name && errors.name.message)}
-                    helperText={errors.name && errors.name.message}
                     label="Judul Kegiatan *"
+                    defaultValue={initialValue?.name}
                   />
                 </FormControl>
                 <FormControl fullWidth>
@@ -324,7 +322,6 @@ const EditWorkCard = ({ initialValue, onClose }: Props) => {
                       const id = val?.id || "";
                       setSelProject(val);
                       setValue("project", id);
-                      console.log("asd", val);
                     }}
                     onAdd={(value) => {
                       setAddProject({ name: value });
