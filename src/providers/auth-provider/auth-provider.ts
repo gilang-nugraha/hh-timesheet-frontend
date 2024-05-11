@@ -39,7 +39,7 @@ export const authProvider: AuthBindings = {
       if (user?.role.name === "Manager") {
         return {
           success: true,
-          redirectTo: "/works",
+          redirectTo: "/employee",
         };
       } else {
         return {

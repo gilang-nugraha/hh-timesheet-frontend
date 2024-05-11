@@ -22,7 +22,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useForm } from "@refinedev/react-hook-form";
 import { ProjectType } from "@type/ProjectType";
-import { WorkType, WorkTypeRequest } from "@type/WorkType";
+import { WorkType } from "@type/WorkType";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import ProjectAutocomplete from "./ProjectAutocomplete";
@@ -33,7 +33,7 @@ import {
   useSelect,
 } from "@refinedev/core";
 import AddProjectCard from "./AddProjectCard";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   getUserRoleFromClientCookies,
   getUserfromClientCookies,
@@ -49,18 +49,23 @@ const style = {
 };
 
 interface Props {
-  initialValue?: WorkType;
+  initialValue: WorkType;
   initialUser?: UserType;
   onClose: () => void;
 }
-const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
+const EditWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
+  const invalidate = useInvalidate();
+
   const { show, close, visible } = useModal();
-  const { open: openNotification } = useNotification();
+  const { open: openNotification, close: closeNotification } =
+    useNotification();
 
-  const [selProject, setSelProject] = useState<ProjectType>();
+  const [selProject, setSelProject] = useState<ProjectType>(
+    initialValue?.project as ProjectType
+  );
   const [addProject, setAddProject] = useState<ProjectType>();
-  const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
 
+  const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
   const user = useMemo(() => {
     return initialUser || getUserfromClientCookies();
   }, [initialUser]);
@@ -81,16 +86,6 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
   // });
   // const userOptions = userSelectProps || [];
 
-  const defaultValues: WorkType | WorkTypeRequest = initialValue || {
-    name: "",
-    employee: user?.id,
-    project: "",
-    startDate: "",
-    endDate: "",
-    startTime: "",
-    endTime: "",
-  };
-
   const {
     refineCore: { onFinish, formLoading },
     register,
@@ -99,17 +94,19 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
     formState: { errors },
     getValues,
     setValue,
+    reset,
   } = useForm({
     refineCoreProps: {
-      ...(initialValue && { id: initialValue.id }),
-      action: initialValue ? "edit" : "create",
+      action: "edit",
       resource: "timesheet",
       redirect: false,
+      id: initialValue?.id,
       onMutationSuccess: () => {
+        reset();
+        invalidate({ resource: "works", invalidates: ["list"] });
         onClose();
       },
     },
-    ...(initialValue && { defaultValues: defaultValues as WorkType }),
   });
 
   const onFinishHandler = (data: WorkType) => {
@@ -149,7 +146,7 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
       "YYYY-MM-DD HH:mm"
     );
 
-    // for admin testing purpose
+    //for admin testing purpose
     // if (userRole.name !== "Manager") {
     //   data.employee = user.id;
     // }
@@ -162,10 +159,13 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
     };
     onFinish(requestData);
   };
+
   return (
     <>
       <Card sx={style}>
-        <form onSubmit={handleSubmit(onFinishHandler)}>
+        <form
+          onSubmit={handleSubmit((data) => onFinishHandler(data as WorkType))}
+        >
           <CardHeader
             title={
               <Stack
@@ -201,6 +201,7 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                           <DatePicker
                             label="Tanggal Mulai *"
                             format="DD MMMM YYYY"
+                            value={dayjs(initialValue?.startDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -214,11 +215,12 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                       <Controller
                         name="endDate"
                         control={control}
-                        defaultValue={initialValue?.startDate}
+                        defaultValue={initialValue?.endDate}
                         render={({ field }) => (
                           <DatePicker
                             label="Tanggal Berakhir *"
                             format="DD MMMM YYYY"
+                            value={dayjs(initialValue?.endDate)}
                             minDate={dayjs(getValues("startDate"))}
                             onChange={(newValue) => {
                               field.onChange(newValue);
@@ -240,6 +242,7 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                             label="Jam Mulai *"
                             format="HH:mm"
                             ampm={false}
+                            value={dayjs(initialValue?.startDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -254,12 +257,13 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                       <Controller
                         name="endTime"
                         control={control}
-                        defaultValue={initialValue?.startDate}
+                        defaultValue={initialValue?.endDate}
                         render={({ field }) => (
                           <TimePicker
                             label="Jam Berakhir *"
                             format="HH:mm"
                             ampm={false}
+                            value={dayjs(initialValue?.endDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -269,6 +273,16 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                     </FormControl>
                   </Grid>
                 </Grid>
+                <FormControl fullWidth>
+                  <TextField
+                    {...register("name", {
+                      required: "Wajib diisi",
+                    })}
+                    error={!!(errors.name && errors.name.message)}
+                    label="Judul Kegiatan *"
+                    defaultValue={initialValue?.name}
+                  />
+                </FormControl>
                 {/* comment it now only for testing/debug purpose */}
                 {/* {userRole?.name === "Manager" && (
                   <FormControl fullWidth>
@@ -304,16 +318,6 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                     </Select>
                   </FormControl>
                 )} */}
-                <FormControl fullWidth>
-                  <TextField
-                    {...register("name", {
-                      required: "Wajib diisi",
-                    })}
-                    error={!!(errors.name && errors.name.message)}
-                    helperText={errors.name && errors.name.message}
-                    label="Judul Kegiatan *"
-                  />
-                </FormControl>
                 <FormControl fullWidth>
                   <ProjectAutocomplete
                     {...register("project", {
@@ -367,4 +371,4 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
   );
 };
 
-export default AddWorkCard;
+export default EditWorkCard;

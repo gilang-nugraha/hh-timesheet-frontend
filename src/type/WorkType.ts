@@ -31,3 +31,12 @@ export type WorkTypeRequest = {
   endTime: string;
   employeeRate?: number;
 };
+
+export type SummaryTimesheetType = {
+  baseDuration: number;
+  overtimeDuration: number;
+  overtimeIncome: number;
+  baseIncome: number;
+  totalIncome: number;
+  totalDuration: number;
+};

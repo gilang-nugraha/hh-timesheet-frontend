@@ -1,15 +1,9 @@
 "use client";
 
 import AddEmployeeCard from "@components/reuseable/AddEmployeeCard";
-import {
-  AddCircle,
-  AddCircleOutline,
-  FilterList,
-  SearchOutlined,
-} from "@mui/icons-material";
+import { AddCircleOutline, SearchOutlined } from "@mui/icons-material";
 import {
   Button,
-  IconButton,
   InputAdornment,
   Modal,
   Stack,
@@ -27,7 +21,7 @@ import {
 } from "@refinedev/mui";
 import { RoleType, UserType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export default function EmployeePage() {
   const { visible, show, close } = useModal();
@@ -58,7 +52,7 @@ export default function EmployeePage() {
       ],
     },
   });
-  const columns = React.useMemo<GridColDef[]>(
+  const columns = useMemo<GridColDef[]>(
     () => [
       {
         field: "username",

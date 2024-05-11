@@ -45,15 +45,9 @@ export default function RootLayout({
                   notificationProvider={notificationProvider}
                   resources={[
                     {
-                      name: "works",
-                      list: "/works",
-                      options: {
-                        label: "Daftar Kegiatan",
-                      },
-                    },
-                    {
                       name: "users",
                       list: "/employee",
+                      show: "/employee/show/:id",
                       options: {
                         label: "Daftar Karyawan",
                       },
@@ -63,6 +57,15 @@ export default function RootLayout({
                       list: "/setting",
                       options: {
                         label: "Pengaturan",
+                      },
+                    },
+                    {
+                      name: "works",
+                      list: "/works",
+                      options: {
+                        label: "Daftar Kegiatan",
+                        // hide it from now, i dont think it's needed
+                        hide: true,
                       },
                     },
                     {

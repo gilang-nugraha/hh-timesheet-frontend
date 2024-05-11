@@ -29,7 +29,7 @@ import {
 import { ProjectType } from "@type/ProjectType";
 import { WorkType } from "@type/WorkType";
 import Image from "next/image";
-import React from "react";
+import React, { useMemo } from "react";
 
 export default function WorkPage() {
   const { visible, show, close } = useModal();
@@ -52,7 +52,7 @@ export default function WorkPage() {
 
   const { loading } = dataGridProps;
 
-  const columns = React.useMemo<GridColDef[]>(
+  const columns = useMemo<GridColDef[]>(
     () => [
       {
         field: "name",
@@ -120,7 +120,6 @@ export default function WorkPage() {
           return (
             <>
               <EditButton hideText recordItemId={row.id} />
-              <ShowButton hideText recordItemId={row.id} />
               <DeleteButton hideText recordItemId={row.id} />
             </>
           );
@@ -208,7 +207,7 @@ export default function WorkPage() {
         <ModalFilter
           open={visible}
           onClose={close}
-          filterData={projectList}
+          filterData={projectList as { id: string; name: string }[]}
           multiple={true}
           inputTitle="Proyek"
           modalTitle="Filter"

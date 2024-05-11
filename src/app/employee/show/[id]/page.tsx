@@ -39,7 +39,6 @@ import {
   BaseKey,
   CanAccess,
   useExport,
-  useInvalidate,
   useList,
   useModal,
   useOne,
@@ -107,8 +106,7 @@ const DynamicPdfComponent = dynamic(() => Promise.resolve(handlePdf) as any, {
   ssr: false,
 });
 
-export default function TimesheetPage() {
-  const invalidate = useInvalidate();
+export default function EmployeeTimesheetPage() {
   const { mutate: recalculate } = useUpdateMany();
   const {
     visible: loadingModal,
@@ -374,12 +372,7 @@ export default function TimesheetPage() {
                 hideText
                 recordItemId={row.id}
                 resource="works"
-                onSuccess={() => {
-                  invalidate({
-                    resource: "timesheet",
-                    invalidates: ["list"],
-                  });
-                }}
+                invalidates={["list"]}
                 disabled={false}
               />
             </>
@@ -452,7 +445,7 @@ export default function TimesheetPage() {
   if (!isLoading) {
     return (
       <CanAccess
-        resource="timesheet"
+        resource="users"
         action="list"
         fallback={<Typography>No access</Typography>}
       >
