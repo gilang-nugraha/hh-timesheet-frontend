@@ -1,5 +1,6 @@
 "use client";
 
+import { PercentOutlined } from "@mui/icons-material";
 import {
   Button,
   Card,
@@ -11,23 +12,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { BaseRecord, useApiUrl, useCustom } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { SettingType } from "@type/SettingType";
-import { useMemo } from "react";
-import { BaseRecord, useApiUrl, useCustom } from "@refinedev/core";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import {
-  LockClockOutlined,
-  PercentOutlined,
-  ScheduleOutlined,
-  TimerOutlined,
-  WatchOutlined,
-} from "@mui/icons-material";
+import utc from "dayjs/plugin/utc";
+import { useMemo } from "react";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 

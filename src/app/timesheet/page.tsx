@@ -1,8 +1,8 @@
 "use client";
 
-import AddEmployeeCard from "@components/reuseable/AddEmployeeCard";
+import AddWorkCard from "@components/reuseable/AddWorkCard";
+import ModalFilter from "@components/reuseable/ModalFIlter";
 import {
-  AddCircle,
   AddCircleOutline,
   FilterList,
   SearchOutlined,
@@ -17,78 +17,188 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useApiUrl, useCustom, useModal } from "@refinedev/core";
+import { useList, useModal } from "@refinedev/core";
 import {
+  DateField,
   DeleteButton,
   EditButton,
   List,
   ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
-import { RoleType, UserType } from "@type/UserType";
+import { ProjectType } from "@type/ProjectType";
 import { WorkType } from "@type/WorkType";
-import React, { useState } from "react";
+import {
+  formatMillisecondsToHHMM,
+  formatToIndonesianCurrency,
+  formatToIndonesianTime,
+} from "@utility/calculate-timesheet";
+import { getUserfromClientCookies } from "@utility/user-utility";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import React, { useEffect, useMemo, useState } from "react";
 
-export default function ActivityList() {
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+export default function TimesheetPage() {
   const { visible, show, close } = useModal();
-  const [selEmployee, setSelEmployee] = useState<UserType>();
+  const [isLoading, setIsLoading] = useState(true);
 
-  const APIURL = useApiUrl();
-  const { data: roleData } = useCustom({
-    url: `${APIURL}/users-permissions/roles`,
-    method: "get",
-  });
-  const employeeRole: RoleType = roleData?.data?.roles?.find(
-    (role: RoleType) => role.name === "Authenticated"
-  );
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
+  const {
+    visible: visibleAddModal,
+    show: showAddModal,
+    close: closeAddModal,
+  } = useModal();
+
+  const user = useMemo(() => getUserfromClientCookies(), []);
+  const userId = user?.id;
+  useEffect(() => {
+    if (userId) {
+    }
+  }, [userId]);
   const { dataGridProps, search, setFilters } = useDataGrid({
+    resource: "works",
     syncWithLocation: false,
-    queryOptions: {
-      enabled: !!employeeRole,
-    },
     filters: {
       defaultBehavior: "replace",
       permanent: [
         {
-          field: "role",
+          field: "employee",
           operator: "eq",
-          value: employeeRole?.id,
+          value: userId,
         },
       ],
     },
+    sorters: {
+      initial: [
+        {
+          field: "startDate",
+          order: "desc",
+        },
+      ],
+    },
+    meta: {
+      populate: "*",
+    },
+    onSearch: (values: WorkType) => {
+      return [
+        {
+          field: "name",
+          operator: "contains",
+          value: values.name,
+        },
+      ];
+    },
   });
+
+  const { loading } = dataGridProps;
+
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
-        field: "username",
+        field: "name",
         flex: 1,
-        headerName: "Nama Karyawan",
-        minWidth: 200,
+        headerName: "Judul Kegiatan",
+      },
+      {
+        field: "project.name",
+        flex: 1,
+        headerName: "Nama Proyek",
+        valueGetter: (params) => params.row.project.name,
+      },
+      {
+        field: "startDate",
+        flex: 1,
+        headerName: "Tanggal Mulai",
+        renderCell: function render({ value }) {
+          return <DateField value={value} format="DD MMMM YYYY" />;
+        },
+      },
+      {
+        field: "endDate",
+        flex: 1,
+        headerName: "Tanggal Berakhir",
+        renderCell: function render({ value }) {
+          return <DateField value={value} format="DD MMMM YYYY" />;
+        },
+      },
+      {
+        field: "timeStart",
+        flex: 1,
+        headerName: "Waktu Mulai",
+        sortable: false,
+        renderCell: function render({ value, row }) {
+          return <DateField value={row.startDate} format="HH:mm" />;
+        },
+      },
+      {
+        field: "timeEnd",
+        flex: 1,
+        headerName: "Waktu Berakhir",
+        sortable: false,
+        renderCell: function render({ value, row }) {
+          return <DateField value={row.endDate} format="HH:mm" />;
+        },
+      },
+      {
+        field: "overtimeDuration",
+        flex: 1,
+        headerName: "Durasi Lembur",
+        sortable: false,
+        valueGetter: (params) => {
+          const overTimeDuration = formatMillisecondsToHHMM(
+            params.row.overtimeDuration
+          );
+          return `${formatToIndonesianTime(overTimeDuration)}`;
+        },
       },
 
       {
-        field: "email",
+        field: "totalDuration",
         flex: 1,
-        headerName: "Email Karyawan",
-        minWidth: 200,
+        headerName: "Total Durasi",
+        sortable: false,
+        valueGetter: (params) => {
+          const totalDuration = formatMillisecondsToHHMM(
+            params.row.totalDuration
+          );
+          return `${formatToIndonesianTime(totalDuration)}`;
+        },
       },
       {
-        field: "rate",
+        field: "baseIncome",
         flex: 1,
-        headerName: "Rate /jam",
-        minWidth: 250,
-        renderCell: function render({ row }) {
-          return (
-            <Typography variant="body2">
-              {new Intl.NumberFormat("id-ID", {
-                style: "currency",
-                currency: "IDR",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(row.rate)}
-            </Typography>
-          );
+        headerName: "Pendapatan Normal",
+        sortable: false,
+        valueGetter: (params) => {
+          return `${formatToIndonesianCurrency(params.row.baseIncome)}`;
+        },
+      },
+
+      {
+        field: "overtimeIncome",
+        flex: 1,
+        headerName: "Pendapatan Lembur",
+        sortable: false,
+        valueGetter: (params) => {
+          return `${formatToIndonesianCurrency(params.row.overtimeIncome)}`;
+        },
+      },
+      {
+        field: "totalIncome",
+        flex: 1,
+        headerName: "Total Pendapatan",
+        sortable: false,
+        valueGetter: (params) => {
+          return `${formatToIndonesianCurrency(params.row.totalIncome)}`;
         },
       },
       {
@@ -98,13 +208,7 @@ export default function ActivityList() {
         renderCell: function render({ row }) {
           return (
             <>
-              <EditButton
-                hideText
-                onClick={() => {
-                  setSelEmployee(row);
-                  show();
-                }}
-              />
+              <EditButton hideText recordItemId={row.id} />
               <ShowButton hideText recordItemId={row.id} />
               <DeleteButton hideText recordItemId={row.id} />
             </>
@@ -118,76 +222,149 @@ export default function ActivityList() {
     []
   );
 
+  const { data: dataProject } = useList<ProjectType>({
+    resource: "projects",
+  });
+
+  const projectList = dataProject?.data || [];
+
   const handleSearch = (value: string) => {
     if (value.length >= 3 || value === "") {
       search({ name: value } as WorkType);
     }
   };
-  const { loading } = dataGridProps;
 
-  return (
-    <List
-      title={
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography variant="h6" fontWeight={"bold"}>
-              Daftar Karyawan
-            </Typography>
-
-            <Button
-              color="secondary"
-              variant="outlined"
-              startIcon={<AddCircleOutline />}
-              onClick={show}
-            >
-              Tambah Karyawan
-            </Button>
-          </Stack>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              variant="outlined"
-              placeholder="Cari"
-              onChange={(e) => {
-                handleSearch(e.target.value);
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Stack>
-        </Stack>
-      }
-    >
-      <DataGrid
-        {...dataGridProps}
-        columns={columns}
-        autoHeight
-        loading={loading}
-      />
-      <Modal
-        open={visible}
-        onClose={() => {
-          close();
-          setSelEmployee(undefined);
-        }}
-      >
-        <AddEmployeeCard
-          initialValue={selEmployee}
-          onClose={() => {
-            close();
-            setSelEmployee(undefined);
+  const handleFilterProject = (value: string | string[]) => {
+    setFilters([
+      {
+        field: "project",
+        value: value ? value : undefined,
+        operator: "eq",
+      },
+    ]);
+  };
+  if (!isLoading) {
+    return (
+      <>
+        <List
+          title={
+            <Stack direction={"row"} gap={4}>
+              <Stack direction={"column"}>
+                <Typography variant="body2">Nama Karyawan</Typography>
+                <Typography>{user?.username || ""}</Typography>
+              </Stack>
+              <Stack direction={"column"}>
+                <Typography variant="body2">Rate</Typography>
+                <Typography>
+                  {formatToIndonesianCurrency(user.rate || 0)}/jam
+                </Typography>
+              </Stack>
+            </Stack>
+          }
+          headerProps={{
+            sx: {
+              borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+            },
           }}
+        >
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              my: 4,
+            }}
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="h6" fontWeight={"bold"}>
+                Daftar Kegiatan
+              </Typography>
+
+              <Button
+                color="secondary"
+                variant="outlined"
+                startIcon={<AddCircleOutline />}
+                onClick={showAddModal}
+              >
+                Tambah Kegiatan
+              </Button>
+            </Stack>
+
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                variant="outlined"
+                placeholder="Cari"
+                onChange={(e) => {
+                  handleSearch(e.target.value);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  show();
+                }}
+              >
+                <FilterList />
+              </IconButton>
+            </Stack>
+          </Stack>
+          <DataGrid
+            {...dataGridProps}
+            columns={columns}
+            autoHeight
+            loading={loading}
+          />
+          <Stack direction="column" gap={2}>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="h6" color="secondary">
+                Total Durasi
+              </Typography>
+              <Typography variant="h6" fontWeight={"bold"} color="secondary">
+                -
+              </Typography>
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="h5" fontWeight={"bold"} color="secondary">
+                Total Pendapatan
+              </Typography>
+              <Typography variant="h5" fontWeight={"bold"} color="secondary">
+                {formatToIndonesianCurrency(0)}
+              </Typography>
+            </Stack>
+          </Stack>
+        </List>
+
+        <ModalFilter
+          open={visible}
+          onClose={close}
+          filterData={projectList as { id: string | number; name: string }[]}
+          multiple={true}
+          inputTitle="Proyek"
+          modalTitle="Filter"
+          onFilter={handleFilterProject}
         />
-      </Modal>
-    </List>
-  );
+        <Modal open={visibleAddModal} onClose={closeAddModal}>
+          <AddWorkCard onClose={closeAddModal} />
+        </Modal>
+      </>
+    );
+  }
 }

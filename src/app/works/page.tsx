@@ -31,7 +31,7 @@ import { WorkType } from "@type/WorkType";
 import Image from "next/image";
 import React from "react";
 
-export default function ActivityList() {
+export default function WorkPage() {
   const { visible, show, close } = useModal();
 
   const { dataGridProps, search, setFilters } = useDataGrid({

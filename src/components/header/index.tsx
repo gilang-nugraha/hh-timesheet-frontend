@@ -1,20 +1,13 @@
 import HeaderMenu from "@components/menu";
-import Menu from "@components/menu";
-import { ColorModeContext } from "@contexts/color-mode";
 import { LogoutOutlined } from "@mui/icons-material";
-import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
-import { Container } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
-import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import { useGetIdentity, useLogout } from "@refinedev/core";
-import { HamburgerMenu, RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
+import { useLogout } from "@refinedev/core";
+import { RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
 import Image from "next/image";
-import React, { useContext } from "react";
+import React from "react";
 
 export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   sticky = true,

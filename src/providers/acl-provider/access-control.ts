@@ -6,8 +6,6 @@ export const aclProvider: AccessControlProvider = {
     const userCookie = Cookies.get("user");
     const user = JSON.parse(userCookie || "{}");
     const userRole = user ? user.role : null;
-    console.log("user", user);
-    console.log("userRole", userRole);
     if (resource === "works" && userRole?.name === "Manager") {
       return {
         can: true,

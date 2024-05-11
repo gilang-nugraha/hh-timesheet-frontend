@@ -17,7 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useApiUrl, useCustom, useModal } from "@refinedev/core";
+import { CanAccess, useApiUrl, useCustom, useModal } from "@refinedev/core";
 import {
   DeleteButton,
   EditButton,
@@ -29,7 +29,7 @@ import { RoleType, UserType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
 import React, { useState } from "react";
 
-export default function ActivityList() {
+export default function EmployeePage() {
   const { visible, show, close } = useModal();
   const [selEmployee, setSelEmployee] = useState<UserType>();
 
@@ -126,68 +126,74 @@ export default function ActivityList() {
   const { loading } = dataGridProps;
 
   return (
-    <List
-      title={
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography variant="h6" fontWeight={"bold"}>
-              Daftar Karyawan
-            </Typography>
-
-            <Button
-              color="secondary"
-              variant="outlined"
-              startIcon={<AddCircleOutline />}
-              onClick={show}
-            >
-              Tambah Karyawan
-            </Button>
-          </Stack>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              variant="outlined"
-              placeholder="Cari"
-              onChange={(e) => {
-                handleSearch(e.target.value);
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Stack>
-        </Stack>
-      }
+    <CanAccess
+      resource="users"
+      action="list"
+      fallback={<Typography>No access</Typography>}
     >
-      <DataGrid
-        {...dataGridProps}
-        columns={columns}
-        autoHeight
-        loading={loading}
-      />
-      <Modal
-        open={visible}
-        onClose={() => {
-          close();
-          setSelEmployee(undefined);
-        }}
+      <List
+        title={
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="h6" fontWeight={"bold"}>
+                Daftar Karyawan
+              </Typography>
+
+              <Button
+                color="secondary"
+                variant="outlined"
+                startIcon={<AddCircleOutline />}
+                onClick={show}
+              >
+                Tambah Karyawan
+              </Button>
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                variant="outlined"
+                placeholder="Cari"
+                onChange={(e) => {
+                  handleSearch(e.target.value);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Stack>
+          </Stack>
+        }
       >
-        <AddEmployeeCard
-          initialValue={selEmployee}
+        <DataGrid
+          {...dataGridProps}
+          columns={columns}
+          autoHeight
+          loading={loading}
+        />
+        <Modal
+          open={visible}
           onClose={() => {
             close();
             setSelEmployee(undefined);
           }}
-        />
-      </Modal>
-    </List>
+        >
+          <AddEmployeeCard
+            initialValue={selEmployee}
+            onClose={() => {
+              close();
+              setSelEmployee(undefined);
+            }}
+          />
+        </Modal>
+      </List>
+    </CanAccess>
   );
 }

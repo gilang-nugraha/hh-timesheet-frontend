@@ -86,11 +86,12 @@ export const authProvider: AuthBindings = {
       },
     });
     if (status === 200) {
-      const { id, username, email } = data;
+      const { id, username, email, role } = data;
       return {
         id,
         name: username,
         email,
+        role,
       };
     }
 
