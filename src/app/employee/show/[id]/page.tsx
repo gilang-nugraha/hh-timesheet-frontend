@@ -34,6 +34,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   BaseKey,
   CanAccess,
+  useExport,
   useList,
   useModal,
   useOne,
@@ -134,6 +135,16 @@ export default function TimesheetPage() {
     resource: "users",
     id: userId as BaseKey,
     queryOptions: { enabled: !!userId },
+  });
+  const { triggerExport: exportCsv } = useExport({
+    resource: "timesheet",
+    filters: [
+      {
+        field: "employee",
+        operator: "eq",
+        value: userId,
+      },
+    ],
   });
 
   const user = userData?.data as UserType;
@@ -396,7 +407,7 @@ export default function TimesheetPage() {
     if (type === "excel") {
       exportToExcel({ columns, rows });
     } else if (type === "csv") {
-      // exportToCSV();
+      exportCsv();
     }
   };
 
@@ -549,9 +560,12 @@ export default function TimesheetPage() {
                     <MenuItem onClick={() => handleExport("excel")}>
                       Export to Excel
                     </MenuItem>
-                    <MenuItem>Export to CSV</MenuItem>
+                    <MenuItem onClick={() => handleExport("csv")}>
+                      Export to CSV
+                    </MenuItem>
                     <MenuItem>Print to PDF</MenuItem>
-                    <MenuItem>Import from CSV</MenuItem>
+                    {/* todo */}
+                    {/* <MenuItem>Import from CSV</MenuItem> */}
                   </Paper>
                 </Popper>
               </Fragment>
