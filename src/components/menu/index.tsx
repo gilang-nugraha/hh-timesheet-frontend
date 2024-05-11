@@ -1,36 +1,44 @@
-import { Button, Stack, Typography } from "@mui/material";
-import { ITreeMenu, LayoutProps, useMenu } from "@refinedev/core";
+import { ListOutlined } from "@mui/icons-material";
+import { Button, MenuItem, Stack, Typography } from "@mui/material";
+import {
+  CanAccess,
+  ITreeMenu,
+  LayoutProps,
+  useCan,
+  useMenu,
+} from "@refinedev/core";
 import Link from "next/link";
-import React from "react";
+import React, { Fragment } from "react";
+
+interface MenuProps {
+  name: string;
+  label?: string;
+  icon?: React.ReactNode;
+  route?: string;
+  selectedKey?: string;
+}
+
+const CustomMenuItem = ({ name, label, route, selectedKey }: MenuProps) => {
+  return (
+    <Button
+      style={{
+        color: selectedKey === route ? "primary.main" : "inherit",
+        fontWeight: selectedKey === route ? "bold" : "normal",
+        borderBottom: selectedKey === route ? "2px solid" : "none",
+        borderRadius: 0,
+        textTransform: "capitalize",
+      }}
+      color="secondary"
+      component={Link}
+      href={route}
+    >
+      {label ?? name}
+    </Button>
+  );
+};
 
 const HeaderMenu: React.FC<LayoutProps> = ({ children }) => {
   const { menuItems, selectedKey } = useMenu();
-
-  const renderMenuItems = (items: ITreeMenu[]) => {
-    return (
-      <>
-        {menuItems.map(({ key, name, label, icon, route }) => {
-          return (
-            <Button
-              key={name}
-              style={{
-                color: selectedKey === key ? "primary.main" : "inherit",
-                fontWeight: selectedKey === key ? "bold" : "normal",
-                borderBottom: selectedKey === key ? "2px solid" : "none",
-                borderRadius: 0,
-                textTransform: "capitalize",
-              }}
-              color="secondary"
-              component={Link}
-              href={route}
-            >
-              {label ?? name}
-            </Button>
-          );
-        })}
-      </>
-    );
-  };
 
   return (
     <Stack p={4}>
@@ -38,7 +46,22 @@ const HeaderMenu: React.FC<LayoutProps> = ({ children }) => {
         HH Timesheet
       </Typography>
       <Stack direction="row" gap={2} px={2} mt={2}>
-        {renderMenuItems(menuItems)}
+        {menuItems.map((item) => (
+          <CanAccess
+            key={item.key}
+            resource={item.name.toLowerCase()}
+            action="list"
+            params={{ resource: item }}
+            fallback={<Fragment />}
+          >
+            <CustomMenuItem
+              name={item.key}
+              label={item.label}
+              route={item.route}
+              selectedKey={selectedKey}
+            />
+          </CanAccess>
+        ))}
       </Stack>
     </Stack>
   );

@@ -68,8 +68,15 @@ export default function RootLayout({
                     {
                       name: "timesheet",
                       list: "/timesheet",
-                      meta: {
-                        hide: true,
+                      options: {
+                        label: "Daftar Kegiatan",
+                      },
+                    },
+                    {
+                      name: "user-setting",
+                      list: "/user-setting",
+                      options: {
+                        label: "Pengaturan",
                       },
                     },
                   ]}

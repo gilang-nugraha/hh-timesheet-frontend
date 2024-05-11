@@ -72,7 +72,7 @@ export default function SettingPage() {
   if (settingData) {
     return (
       <CanAccess
-        resource="work-time"
+        resource="user-setting"
         action="list"
         fallback={<Typography>No access</Typography>}
       >

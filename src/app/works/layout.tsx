@@ -8,15 +8,15 @@ import React from "react";
 
 export default async function Layout({ children }: React.PropsWithChildren) {
   const data = await getData();
-  const acl = await getCan();
-  const { can, redirectTo } = acl;
-  console.log("redirectTo", can, redirectTo);
-  if (!data.authenticated) {
-    return redirect(data?.redirectTo || "/login");
-  }
-  if (!can) {
-    return redirect(redirectTo || "/login");
-  }
+
+  // const acl = await getCan();
+  // const { can, redirectTo } = acl;
+  // if (!data.authenticated) {
+  //   return redirect(data?.redirectTo || "/login");
+  // }
+  // if (!can) {
+  //   return redirect(redirectTo || "/login");
+  // }
   return <ThemedLayout>{children}</ThemedLayout>;
 }
 

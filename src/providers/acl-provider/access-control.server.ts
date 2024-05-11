@@ -16,20 +16,29 @@ export const aclProviderServer: AccessControlProvider = {
     const user = JSON.parse(userCookie?.value || "{}");
     const userRole = user ? user.role : null;
 
-    if (resource === "works" && userRole?.name === "Manager") {
+    //allow ACL for Manager
+    if (
+      (resource === "works" && userRole?.name === "Manager") ||
+      (resource === "users" && userRole?.name === "Manager") ||
+      (resource === "work-time" && userRole?.name === "Manager")
+    ) {
       return {
         can: true,
         redirectTo: undefined,
       };
     }
-    if (resource === "works" && userRole?.name !== "Manager") {
+
+    //allow ACL for Employee
+    if (
+      (resource === "user-setting" && userRole?.name !== "Manager") ||
+      (resource === "timesheet" && userRole?.name !== "Manager")
+    ) {
       return {
-        can: false,
-        redirectTo: `/timesheet`,
+        can: true,
+        redirectTo: undefined,
       };
     }
-
-    // Otherwise, allow access
+    // Otherwise, disable access
     return { can: false, redirectTo: undefined };
   },
 };
