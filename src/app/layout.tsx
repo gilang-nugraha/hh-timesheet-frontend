@@ -10,7 +10,8 @@ import React, { Suspense } from "react";
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { authProvider } from "@providers/auth-provider";
 import { dataProvider } from "@providers/data-provider";
-import { aclProvider } from "@providers/acl-provider";
+import { aclProvider } from "@providers/acl-provider/access-control";
+import { aclProviderClient } from "@providers/acl-provider/access-control.client";
 
 export const metadata: Metadata = {
   title: "HH Timesheet",
@@ -40,13 +41,12 @@ export default function RootLayout({
                   routerProvider={routerProvider}
                   authProvider={authProvider}
                   dataProvider={dataProvider}
-                  accessControlProvider={aclProvider}
+                  accessControlProvider={aclProviderClient}
                   notificationProvider={notificationProvider}
                   resources={[
                     {
                       name: "works",
                       list: "/works",
-                      show: "/works/show/:id",
                       options: {
                         label: "Daftar Kegiatan",
                       },
@@ -54,7 +54,6 @@ export default function RootLayout({
                     {
                       name: "users",
                       list: "/employee",
-                      show: "/works/show/:id",
                       options: {
                         label: "Daftar Karyawan",
                       },
@@ -64,6 +63,13 @@ export default function RootLayout({
                       list: "/setting",
                       options: {
                         label: "Pengaturan",
+                      },
+                    },
+                    {
+                      name: "timesheet",
+                      list: "/timesheet",
+                      meta: {
+                        hide: true,
                       },
                     },
                   ]}

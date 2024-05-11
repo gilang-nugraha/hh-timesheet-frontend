@@ -17,6 +17,21 @@ export const authProvider: AuthBindings = {
         path: "/",
       });
 
+      const { data: user, status: userStatus } = await strapiAuthHelper.me(
+        data.jwt,
+        {
+          meta: {
+            populate: "role",
+          },
+        }
+      );
+      if (userStatus === 200) {
+        Cookies.set("user", JSON.stringify(user), {
+          expires: 30, // 30 days
+          path: "/",
+        });
+      }
+
       // set header axios instance
       axiosInstance.defaults.headers.common = {
         Authorization: `Bearer ${data.jwt}`,

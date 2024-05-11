@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useList, useMany, useModal } from "@refinedev/core";
+import { CanAccess, useList, useMany, useModal } from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -156,59 +156,65 @@ export default function ActivityList() {
   };
 
   return (
-    <List
-      title={
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography variant="h6" fontWeight={"bold"}>
-            Daftar Kegiatan
-          </Typography>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              variant="outlined"
-              placeholder="Cari"
-              onChange={(e) => {
-                handleSearch(e.target.value);
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <IconButton
-              color="primary"
-              onClick={() => {
-                show();
-              }}
-            >
-              <FilterList />
-            </IconButton>
-          </Stack>
-        </Stack>
-      }
+    <CanAccess
+      resource="works"
+      action="list"
+      fallback={<Typography>No access</Typography>}
     >
-      <DataGrid
-        {...dataGridProps}
-        columns={columns}
-        autoHeight
-        loading={loading}
-      />
-      <ModalFilter
-        open={visible}
-        onClose={close}
-        filterData={projectList}
-        multiple={true}
-        inputTitle="Proyek"
-        modalTitle="Filter"
-        onFilter={handleFilterProject}
-      />
-    </List>
+      <List
+        title={
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography variant="h6" fontWeight={"bold"}>
+              Daftar Kegiatan
+            </Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                variant="outlined"
+                placeholder="Cari"
+                onChange={(e) => {
+                  handleSearch(e.target.value);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  show();
+                }}
+              >
+                <FilterList />
+              </IconButton>
+            </Stack>
+          </Stack>
+        }
+      >
+        <DataGrid
+          {...dataGridProps}
+          columns={columns}
+          autoHeight
+          loading={loading}
+        />
+        <ModalFilter
+          open={visible}
+          onClose={close}
+          filterData={projectList}
+          multiple={true}
+          inputTitle="Proyek"
+          modalTitle="Filter"
+          onFilter={handleFilterProject}
+        />
+      </List>
+    </CanAccess>
   );
 }
