@@ -160,7 +160,6 @@ const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
       ...data,
       startDate: combineStartDate,
       endDate: combineEndDate,
-      employeeRate: user.rate,
       employee: user.id,
     };
     onFinish(requestData);

@@ -7,16 +7,21 @@ import {
   AddCircleOutline,
   EditOutlined,
   FilterList,
+  PriorityHighOutlined,
+  QuestionMarkOutlined,
   SearchOutlined,
+  WarningOutlined,
 } from "@mui/icons-material";
 import {
   Button,
   Divider,
+  Icon,
   IconButton,
   InputAdornment,
   Modal,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -231,6 +236,24 @@ export default function TimesheetPage() {
           return `${formatToIndonesianCurrency(params.row.totalIncome)}`;
         },
       },
+
+      {
+        field: "employeeRate",
+        flex: 1,
+        headerName: "Rate /Jam",
+        valueGetter: (params) => {
+          return `${formatToIndonesianCurrency(params.row.employeeRate)}`;
+        },
+      },
+
+      {
+        field: "setting.overtimeRate",
+        flex: 1,
+        headerName: "% Rate",
+        valueGetter: (params) => {
+          return `${params.row.setting.overtimeRate}%`;
+        },
+      },
       {
         field: "actions",
         headerName: "Aksi",
@@ -327,11 +350,51 @@ export default function TimesheetPage() {
               my: 4,
             }}
           >
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
               <Typography variant="h6" fontWeight={"bold"}>
                 Daftar Kegiatan
               </Typography>
-
+              <Tooltip
+                title={
+                  <Stack direction={"column"}>
+                    <Typography variant="caption">
+                      - perhitungan lembur adalah <br />
+                      (total durasi lembur * rate) * %rate lembur yang berlaku
+                      saat submit
+                    </Typography>
+                    <Typography variant="caption">
+                      - %rate lembur yang berlaku saat submit
+                    </Typography>
+                  </Stack>
+                }
+                arrow
+                disableInteractive
+              >
+                <QuestionMarkOutlined fontSize="small" color={"secondary"} />
+              </Tooltip>
+              <Tooltip
+                title={
+                  <Stack direction={"column"}>
+                    <Typography variant="caption">
+                      - perhitungan pendapatan dihandle dari backend ketika
+                      submit kegiatan
+                    </Typography>
+                    <Typography variant="caption">
+                      - untuk flow saat ini data rate diambil dari rate yang
+                      berlaku saat submit
+                    </Typography>
+                    <Typography variant="caption">
+                      - jika ingin update perhitungan dari data yang sudah ada,
+                      harus ada trigger untuk recalculate ke rate dan %rate saat
+                      ini
+                    </Typography>
+                  </Stack>
+                }
+                arrow
+                disableInteractive
+              >
+                <PriorityHighOutlined fontSize="small" color={"primary"} />
+              </Tooltip>
               <Button
                 color="secondary"
                 variant="outlined"
