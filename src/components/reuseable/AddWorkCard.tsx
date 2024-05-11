@@ -26,7 +26,7 @@ import { WorkType, WorkTypeRequest } from "@type/WorkType";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import ProjectAutocomplete from "./ProjectAutocomplete";
-import { useModal, useSelect } from "@refinedev/core";
+import { useModal, useNotification, useSelect } from "@refinedev/core";
 import AddProjectCard from "./AddProjectCard";
 import dayjs from "dayjs";
 import {
@@ -48,6 +48,9 @@ interface Props {
 }
 const AddWorkCard = ({ initialValue, onClose }: Props) => {
   const { show, close, visible } = useModal();
+  const { open: openNotification, close: closeNotification } =
+    useNotification();
+
   const [selProject, setSelProject] = useState<ProjectType>();
   const [addProject, setAddProject] = useState<ProjectType>();
   const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
@@ -105,6 +108,29 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
     const endDate = dayjs(data.endDate).format("YYYY-MM-DD");
     const startTime = dayjs(data.startTime).format("HH:mm");
     const endTime = dayjs(data.endTime).format("HH:mm");
+
+    //validation for startDate must be equal or less than endDate
+    if (startDate > endDate) {
+      openNotification?.({
+        type: "error",
+        message: "Error",
+        description: "Tanggal Mulai Harus Kurang dari Tanggal Selesai",
+        key: "notification-key",
+      });
+      return;
+    }
+
+    //validation is same date but startTime must be less than endTime
+    if (startDate === endDate && startTime >= endTime) {
+      openNotification?.({
+        type: "error",
+        message: "Error",
+        description: "Waktu Mulai Harus Kurang dari Waktu Selesai",
+        key: "notification-key",
+      });
+
+      return;
+    }
 
     //combine startDate with startTime
     const combineStartDate = dayjs(`${startDate} ${startTime}`).format(

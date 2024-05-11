@@ -9,6 +9,7 @@ import {
 } from "@mui/icons-material";
 import {
   Button,
+  Divider,
   IconButton,
   InputAdornment,
   Modal,
@@ -31,7 +32,7 @@ import { WorkType } from "@type/WorkType";
 import {
   formatMillisecondsToHHMM,
   formatToIndonesianCurrency,
-  formatToIndonesianTime,
+  formatDurationToIndonesiaTime,
 } from "@utility/calculate-timesheet";
 import { getUserfromClientCookies } from "@utility/user-utility";
 import dayjs from "dayjs";
@@ -39,6 +40,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import React, { useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -101,6 +103,31 @@ export default function TimesheetPage() {
 
   const { loading } = dataGridProps;
 
+  const logsheets = dataGridProps?.rows;
+
+  const summaryBaseDuration = useMemo(() => {
+    return _.sumBy(logsheets, "baseDuration");
+  }, [logsheets]);
+
+  const summaryOvertimeDuration = useMemo(() => {
+    return _.sumBy(logsheets, "overtimeDuration");
+  }, [logsheets]);
+
+  const summaryOvertimeIncome = useMemo(() => {
+    return _.sumBy(logsheets, "overtimeIncome");
+  }, [logsheets]);
+
+  const summaryBaseIncome = useMemo(() => {
+    return _.sumBy(logsheets, "baseIncome");
+  }, [logsheets]);
+  const summaryTotalIncome = useMemo(() => {
+    return _.sumBy(logsheets, "totalIncome");
+  }, [logsheets]);
+
+  const summaryTotalDuration = useMemo(() => {
+    return _.sumBy(logsheets, "totalDuration");
+  }, [logsheets]);
+
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
@@ -152,12 +179,10 @@ export default function TimesheetPage() {
         field: "overtimeDuration",
         flex: 1,
         headerName: "Durasi Lembur",
-        sortable: false,
         valueGetter: (params) => {
-          const overTimeDuration = formatMillisecondsToHHMM(
+          return `${formatDurationToIndonesiaTime(
             params.row.overtimeDuration
-          );
-          return `${formatToIndonesianTime(overTimeDuration)}`;
+          )}`;
         },
       },
 
@@ -165,19 +190,14 @@ export default function TimesheetPage() {
         field: "totalDuration",
         flex: 1,
         headerName: "Total Durasi",
-        sortable: false,
         valueGetter: (params) => {
-          const totalDuration = formatMillisecondsToHHMM(
-            params.row.totalDuration
-          );
-          return `${formatToIndonesianTime(totalDuration)}`;
+          return `${formatDurationToIndonesiaTime(params.row.totalDuration)}`;
         },
       },
       {
         field: "baseIncome",
         flex: 1,
         headerName: "Pendapatan Normal",
-        sortable: false,
         valueGetter: (params) => {
           return `${formatToIndonesianCurrency(params.row.baseIncome)}`;
         },
@@ -187,7 +207,6 @@ export default function TimesheetPage() {
         field: "overtimeIncome",
         flex: 1,
         headerName: "Pendapatan Lembur",
-        sortable: false,
         valueGetter: (params) => {
           return `${formatToIndonesianCurrency(params.row.overtimeIncome)}`;
         },
@@ -196,7 +215,6 @@ export default function TimesheetPage() {
         field: "totalIncome",
         flex: 1,
         headerName: "Total Pendapatan",
-        sortable: false,
         valueGetter: (params) => {
           return `${formatToIndonesianCurrency(params.row.totalIncome)}`;
         },
@@ -322,20 +340,75 @@ export default function TimesheetPage() {
             autoHeight
             loading={loading}
           />
-          <Stack direction="column" gap={2}>
+          <Stack direction="column">
             <Stack
               direction="row"
               spacing={2}
               alignItems="center"
               justifyContent="space-between"
             >
-              <Typography variant="h6" color="secondary">
+              <Typography variant="body1" color="secondary">
+                Total Durasi Normal
+              </Typography>
+              <Typography variant="body1" color="secondary">
+                {formatDurationToIndonesiaTime(summaryBaseDuration)}
+              </Typography>
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="body1" color="primary">
+                Total Durasi Lembur
+              </Typography>
+              <Typography variant="body1" color="primary">
+                {formatDurationToIndonesiaTime(summaryOvertimeDuration)}
+              </Typography>
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="body1" color="secondary">
+                Total Pendapatan Normal
+              </Typography>
+              <Typography variant="body1" color="secondary">
+                {formatToIndonesianCurrency(summaryBaseIncome)}
+              </Typography>
+            </Stack>
+
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="body1" color="primary">
+                Total Pendapatan Lembur
+              </Typography>
+              <Typography variant="body1" color="primary">
+                {formatToIndonesianCurrency(summaryOvertimeIncome)}
+              </Typography>
+            </Stack>
+            <Divider sx={{ my: 2 }} />
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography variant="h6" fontWeight={"bold"} color="secondary">
                 Total Durasi
               </Typography>
               <Typography variant="h6" fontWeight={"bold"} color="secondary">
-                -
+                {formatDurationToIndonesiaTime(summaryTotalDuration)}
               </Typography>
             </Stack>
+
             <Stack
               direction="row"
               spacing={2}
@@ -346,7 +419,7 @@ export default function TimesheetPage() {
                 Total Pendapatan
               </Typography>
               <Typography variant="h5" fontWeight={"bold"} color="secondary">
-                {formatToIndonesianCurrency(0)}
+                {formatToIndonesianCurrency(summaryTotalIncome)}
               </Typography>
             </Stack>
           </Stack>

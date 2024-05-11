@@ -39,12 +39,20 @@ export const formatMillisecondsToHours = (milliseconds: number) => {
 };
 
 // Format to Indonesia Time
-export const formatToIndonesianTime = (timeString: string) => {
-  const [hours, minutes] = timeString.split(":").map(Number);
-  const hourText = hours > 0 ? `${hours} jam` : "";
-  const minuteText = minutes > 0 ? `${minutes} menit` : "";
-  const separator = hours > 0 && minutes > 0 ? " " : "";
-  return `${hourText}${separator}${minuteText}`;
+export const formatDurationToIndonesiaTime = (time: number) => {
+  //parse duration milisecond to ** jam ** menit
+  const durationObj = dayjs.duration(time);
+  const hours = Math.floor(durationObj.asHours());
+  const minutes = durationObj.minutes();
+
+  if (hours === 0) {
+    return `${minutes} menit`;
+  }
+  if (minutes === 0) {
+    return `${hours} jam`;
+  }
+
+  return `${hours} jam ${minutes} menit`;
 };
 
 // Calculate the duration between two time Date objects in minutes

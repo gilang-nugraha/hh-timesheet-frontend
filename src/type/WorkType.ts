@@ -12,11 +12,10 @@ export type WorkType = {
   setting: SettingType;
   duration: number;
   income: number;
-  overTimeIncome: number;
   overtimeDuration: number;
   overtimeIncome: number;
   totalIncome: number;
-  totalTimeDuration: number;
+  totaltimeDuration: number;
   startTime?: string;
   endTime?: string;
   employeeRate?: number;
