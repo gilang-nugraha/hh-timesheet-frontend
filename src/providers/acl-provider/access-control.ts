@@ -11,11 +11,8 @@ export const aclProvider: AccessControlProvider = {
     if (
       (resource === "works" && userRole?.name === "Manager") ||
       (resource === "users" && userRole?.name === "Manager") ||
-      (resource === "work-time" && userRole?.name === "Manager") ||
-      (resource === "timesheet" && userRole?.name === "Manager")
+      (resource === "work-time" && userRole?.name === "Manager")
     ) {
-      console.log("aclhere3");
-
       return {
         can: true,
         redirectTo: undefined,
@@ -27,8 +24,6 @@ export const aclProvider: AccessControlProvider = {
       (resource === "user-setting" && userRole?.name !== "Manager") ||
       (resource === "timesheet" && userRole?.name !== "Manager")
     ) {
-      console.log("aclhere3");
-
       return {
         can: true,
         redirectTo: undefined,

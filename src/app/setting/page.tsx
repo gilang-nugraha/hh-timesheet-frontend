@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { BaseRecord, useApiUrl, useCustom } from "@refinedev/core";
+import { BaseRecord, CanAccess, useApiUrl, useCustom } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { SettingType } from "@type/SettingType";
 import dayjs from "dayjs";
@@ -71,82 +71,88 @@ export default function SettingPage() {
 
   if (settingData) {
     return (
-      <Card sx={style}>
-        <form onSubmit={handleSubmit(onFinishHandler)}>
-          <CardHeader
-            title={
-              <Stack
-                direction={"row"}
-                spacing={2}
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography variant="h6" fontWeight={"bold"}>
-                  Pengaturan
-                </Typography>
-              </Stack>
-            }
-          />
-          <CardContent
-            sx={{
-              borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-              borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-              paddingTop: 4,
-              paddingBottom: 4,
-            }}
-          >
-            <Stack direction={"column"} gap={2}>
-              <FormControl fullWidth>
-                <TextField
-                  variant="outlined"
-                  label="Jam Mulai Bekerja"
-                  type="time"
-                  {...register("startTime")}
-                  defaultValue={settingData?.startTime}
-                  error={!!errors.startTime}
-                  helperText={errors.startTime?.message}
-                />
-              </FormControl>
-              <FormControl fullWidth>
-                <TextField
-                  variant="outlined"
-                  label="Jam Selesai Bekerja"
-                  type="time"
-                  {...register("endTime")}
-                  defaultValue={settingData?.endTime}
-                  error={!!errors.endTime}
-                  helperText={errors.endTime?.message}
-                />
-              </FormControl>
-              <FormControl fullWidth>
-                <TextField
-                  variant="outlined"
-                  label="Persen Rate"
-                  type="number"
-                  {...register("overtimeRate")}
-                  defaultValue={settingData?.overtimeRate}
-                  error={!!errors.overtimeRate}
-                  helperText={errors.overtimeRate?.message}
-                  InputProps={{ endAdornment: <PercentOutlined /> }}
-                />
-              </FormControl>
-            </Stack>
-          </CardContent>
-          <CardActions
-            sx={{ justifyContent: "space-between", padding: 2, gap: 2 }}
-          >
-            <Button
-              variant="contained"
-              color="secondary"
-              type="submit"
-              value="Submit"
-              disabled={formLoading}
+      <CanAccess
+        resource="work-time"
+        action="list"
+        fallback={<Typography>No access</Typography>}
+      >
+        <Card sx={style}>
+          <form onSubmit={handleSubmit(onFinishHandler)}>
+            <CardHeader
+              title={
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="h6" fontWeight={"bold"}>
+                    Pengaturan
+                  </Typography>
+                </Stack>
+              }
+            />
+            <CardContent
+              sx={{
+                borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+                paddingTop: 4,
+                paddingBottom: 4,
+              }}
             >
-              Simpan
-            </Button>
-          </CardActions>
-        </form>
-      </Card>
+              <Stack direction={"column"} gap={2}>
+                <FormControl fullWidth>
+                  <TextField
+                    variant="outlined"
+                    label="Jam Mulai Bekerja"
+                    type="time"
+                    {...register("startTime")}
+                    defaultValue={settingData?.startTime}
+                    error={!!errors.startTime}
+                    helperText={errors.startTime?.message}
+                  />
+                </FormControl>
+                <FormControl fullWidth>
+                  <TextField
+                    variant="outlined"
+                    label="Jam Selesai Bekerja"
+                    type="time"
+                    {...register("endTime")}
+                    defaultValue={settingData?.endTime}
+                    error={!!errors.endTime}
+                    helperText={errors.endTime?.message}
+                  />
+                </FormControl>
+                <FormControl fullWidth>
+                  <TextField
+                    variant="outlined"
+                    label="Persen Rate"
+                    type="number"
+                    {...register("overtimeRate")}
+                    defaultValue={settingData?.overtimeRate}
+                    error={!!errors.overtimeRate}
+                    helperText={errors.overtimeRate?.message}
+                    InputProps={{ endAdornment: <PercentOutlined /> }}
+                  />
+                </FormControl>
+              </Stack>
+            </CardContent>
+            <CardActions
+              sx={{ justifyContent: "space-between", padding: 2, gap: 2 }}
+            >
+              <Button
+                variant="contained"
+                color="secondary"
+                type="submit"
+                value="Submit"
+                disabled={formLoading}
+              >
+                Simpan
+              </Button>
+            </CardActions>
+          </form>
+        </Card>
+      </CanAccess>
     );
   }
 }

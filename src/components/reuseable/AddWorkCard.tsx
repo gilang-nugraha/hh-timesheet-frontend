@@ -26,7 +26,12 @@ import { WorkType, WorkTypeRequest } from "@type/WorkType";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import ProjectAutocomplete from "./ProjectAutocomplete";
-import { useModal, useNotification, useSelect } from "@refinedev/core";
+import {
+  useInvalidate,
+  useModal,
+  useNotification,
+  useSelect,
+} from "@refinedev/core";
 import AddProjectCard from "./AddProjectCard";
 import dayjs from "dayjs";
 import {
@@ -34,6 +39,7 @@ import {
   getUserfromClientCookies,
 } from "@utility/user-utility";
 import { UserType } from "@type/UserType";
+
 const style = {
   position: "absolute" as "absolute",
   top: "50%",
@@ -47,6 +53,8 @@ interface Props {
   onClose: () => void;
 }
 const AddWorkCard = ({ initialValue, onClose }: Props) => {
+  const invalidate = useInvalidate();
+
   const { show, close, visible } = useModal();
   const { open: openNotification, close: closeNotification } =
     useNotification();
@@ -97,6 +105,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
       resource: "timesheet",
       redirect: false,
       onMutationSuccess: () => {
+        invalidate({ resource: "works", invalidates: ["list"] });
         onClose();
       },
     },

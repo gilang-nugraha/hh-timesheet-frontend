@@ -18,41 +18,26 @@ export const aclProviderServer: AccessControlProvider = {
 
     //allow ACL for Manager
     if (
-      resource === "works" ||
-      resource === "users" ||
-      resource === "work-time" ||
-      (resource === "timesheet" && userRole?.name === "Manager")
+      (resource === "works" && userRole?.name === "Manager") ||
+      (resource === "users" && userRole?.name === "Manager") ||
+      (resource === "work-time" && userRole?.name === "Manager")
     ) {
-      console.log("aclhere3");
-
       return {
         can: true,
         redirectTo: undefined,
       };
     }
 
-    //disallow ACL for Employee
-    if (resource === "works" && userRole?.name !== "Manager") {
-      console.log("aclhere");
-
-      return {
-        can: false,
-        redirectTo: undefined,
-      };
-    }
-    //ACL for Employee
+    //allow ACL for Employee
     if (
-      resource === "timesheet" ||
-      (resource === "user-setting" && userRole?.name !== "Manager")
+      (resource === "user-setting" && userRole?.name !== "Manager") ||
+      (resource === "timesheet" && userRole?.name !== "Manager")
     ) {
-      console.log("aclhere2");
-
       return {
         can: true,
         redirectTo: undefined,
       };
     }
-
     // Otherwise, disable access
     return { can: false, redirectTo: undefined };
   },

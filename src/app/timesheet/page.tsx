@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useList, useModal } from "@refinedev/core";
+import { CanAccess, useList, useModal } from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -263,7 +263,11 @@ export default function TimesheetPage() {
   };
   if (!isLoading) {
     return (
-      <>
+      <CanAccess
+        resource="timesheet"
+        action="list"
+        fallback={<Typography>No access</Typography>}
+      >
         <List
           title={
             <Stack direction={"row"} gap={4}>
@@ -437,7 +441,7 @@ export default function TimesheetPage() {
         <Modal open={visibleAddModal} onClose={closeAddModal}>
           <AddWorkCard onClose={closeAddModal} />
         </Modal>
-      </>
+      </CanAccess>
     );
   }
 }
