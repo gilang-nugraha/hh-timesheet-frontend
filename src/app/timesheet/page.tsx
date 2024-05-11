@@ -1,9 +1,11 @@
 "use client";
 
 import AddWorkCard from "@components/reuseable/AddWorkCard";
+import EditWorkCard from "@components/reuseable/EditWorkCard";
 import ModalFilter from "@components/reuseable/ModalFIlter";
 import {
   AddCircleOutline,
+  EditOutlined,
   FilterList,
   SearchOutlined,
 } from "@mui/icons-material";
@@ -47,7 +49,7 @@ dayjs.extend(timezone);
 export default function TimesheetPage() {
   const { visible, show, close } = useModal();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [initialValue, setInitialValue] = useState<WorkType>();
   useEffect(() => {
     setIsLoading(false);
   }, []);
@@ -56,6 +58,12 @@ export default function TimesheetPage() {
     visible: visibleAddModal,
     show: showAddModal,
     close: closeAddModal,
+  } = useModal();
+
+  const {
+    visible: visibleEditModal,
+    show: showEditModal,
+    close: closeEditModal,
   } = useModal();
 
   const user = useMemo(() => getUserfromClientCookies(), []);
@@ -225,11 +233,19 @@ export default function TimesheetPage() {
         renderCell: function render({ row }) {
           return (
             <>
-              <EditButton
-                hideText
-                recordItemId={row.id}
-                onClick={() => alert("saadad")}
-              />
+              <Button
+                onClick={() => {
+                  setInitialValue({
+                    ...row,
+                    employee: row?.employee?.id,
+                    project: row?.project,
+                  });
+                  showEditModal();
+                }}
+                sx={{ minWidth: 0 }}
+              >
+                <EditOutlined fontSize="small" sx={{ selfAlign: "center" }} />
+              </Button>
               <DeleteButton
                 hideText
                 recordItemId={row.id}
@@ -448,6 +464,12 @@ export default function TimesheetPage() {
         />
         <Modal open={visibleAddModal} onClose={closeAddModal}>
           <AddWorkCard onClose={closeAddModal} />
+        </Modal>
+        <Modal open={visibleEditModal} onClose={closeEditModal}>
+          <EditWorkCard
+            onClose={closeEditModal}
+            initialValue={initialValue as WorkType}
+          />
         </Modal>
       </CanAccess>
     );

@@ -22,7 +22,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useForm } from "@refinedev/react-hook-form";
 import { ProjectType } from "@type/ProjectType";
-import { WorkType, WorkTypeRequest } from "@type/WorkType";
+import { WorkType } from "@type/WorkType";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import ProjectAutocomplete from "./ProjectAutocomplete";
@@ -33,7 +33,7 @@ import {
   useSelect,
 } from "@refinedev/core";
 import AddProjectCard from "./AddProjectCard";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   getUserRoleFromClientCookies,
   getUserfromClientCookies,
@@ -49,17 +49,19 @@ const style = {
 };
 
 interface Props {
-  initialValue?: WorkType;
+  initialValue: WorkType;
   onClose: () => void;
 }
-const AddWorkCard = ({ initialValue, onClose }: Props) => {
+const EditWorkCard = ({ initialValue, onClose }: Props) => {
   const invalidate = useInvalidate();
 
   const { show, close, visible } = useModal();
   const { open: openNotification, close: closeNotification } =
     useNotification();
 
-  const [selProject, setSelProject] = useState<ProjectType>();
+  const [selProject, setSelProject] = useState<ProjectType>(
+    initialValue?.project as ProjectType
+  );
   const [addProject, setAddProject] = useState<ProjectType>();
   const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
   const user = useMemo(() => getUserfromClientCookies(), []);
@@ -80,15 +82,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
 
   const userOptions = userSelectProps || [];
 
-  const defaultValues: WorkType | WorkTypeRequest = initialValue || {
-    name: "",
-    employee: "",
-    project: "",
-    startDate: "",
-    endDate: "",
-    startTime: "",
-    endTime: "",
-  };
+  const defaultValues: WorkType = initialValue;
 
   const {
     refineCore: { onFinish, formLoading },
@@ -101,7 +95,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
   } = useForm({
     refineCoreProps: {
       ...(initialValue && { id: initialValue.id }),
-      action: initialValue ? "edit" : "create",
+      action: "edit",
       resource: "timesheet",
       redirect: false,
       onMutationSuccess: () => {
@@ -109,7 +103,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
         onClose();
       },
     },
-    ...(initialValue && { defaultValues: defaultValues as WorkType }),
+    defaultValues: defaultValues,
   });
 
   const onFinishHandler = (data: WorkType) => {
@@ -161,6 +155,9 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
     };
     onFinish(requestData);
   };
+
+  console.log(initialValue);
+
   return (
     <>
       <Card sx={style}>
@@ -200,6 +197,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                           <DatePicker
                             label="Tanggal Mulai *"
                             format="DD MMMM YYYY"
+                            value={dayjs(initialValue?.startDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -213,11 +211,12 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                       <Controller
                         name="endDate"
                         control={control}
-                        defaultValue={initialValue?.startDate}
+                        defaultValue={initialValue?.endDate}
                         render={({ field }) => (
                           <DatePicker
                             label="Tanggal Berakhir *"
                             format="DD MMMM YYYY"
+                            value={dayjs(initialValue?.endDate)}
                             minDate={dayjs(getValues("startDate"))}
                             onChange={(newValue) => {
                               field.onChange(newValue);
@@ -239,6 +238,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                             label="Jam Mulai *"
                             format="HH:mm"
                             ampm={false}
+                            value={dayjs(initialValue?.startDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -259,6 +259,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                             label="Jam Berakhir *"
                             format="HH:mm"
                             ampm={false}
+                            value={dayjs(initialValue?.endDate)}
                             onChange={(newValue) => {
                               field.onChange(newValue);
                             }}
@@ -367,4 +368,4 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
   );
 };
 
-export default AddWorkCard;
+export default EditWorkCard;
