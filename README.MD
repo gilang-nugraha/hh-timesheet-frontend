@@ -41,6 +41,8 @@ To run this project, you will need to add the following environment variables to
 
 ### Running the development server.
 
+Development is using Node.js v20.10.0, i recommend using same version or minimum 18^
+
 ```bash
     yarn dev
 ```
