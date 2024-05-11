@@ -101,13 +101,23 @@ export default function TimesheetPage() {
     show: showEditModal,
     close: closeEditModal,
   } = useModal();
+
   //get query params
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+  const userCookie = useMemo(() => getUserfromClientCookies(), []);
+
+  const userId = useMemo(() => {
+    if (!paramId) {
+      return userCookie?.id;
+    } else {
+      return paramId;
+    }
+  }, [userCookie, paramId]);
 
   const { data: userData, isLoading: isLoadingUser } = useOne({
     resource: "users",
-    id: id as BaseKey,
-    queryOptions: { enabled: !!id },
+    id: userId as BaseKey,
+    queryOptions: { enabled: !!userId },
   });
 
   const user = userData?.data as UserType;
@@ -121,7 +131,7 @@ export default function TimesheetPage() {
         {
           field: "employee",
           operator: "eq",
-          value: id,
+          value: userId,
         },
       ],
     },
@@ -367,7 +377,7 @@ export default function TimesheetPage() {
   if (!isLoading) {
     return (
       <CanAccess
-        resource="works"
+        resource="employee"
         action="list"
         fallback={<Typography>No access</Typography>}
       >

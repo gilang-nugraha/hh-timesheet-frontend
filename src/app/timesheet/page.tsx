@@ -1,26 +1,40 @@
 "use client";
 
 import AddWorkCard from "@components/reuseable/AddWorkCard";
+import ConfirmationDialog from "@components/reuseable/ConfirmationDialog";
 import EditWorkCard from "@components/reuseable/EditWorkCard";
 import ModalFilter from "@components/reuseable/ModalFIlter";
 import {
   AddCircleOutline,
   EditOutlined,
   FilterList,
+  PriorityHighOutlined,
+  QuestionMarkOutlined,
   SearchOutlined,
+  UpdateOutlined,
+  WarningOutlined,
 } from "@mui/icons-material";
 import {
   Button,
   Divider,
+  Icon,
   IconButton,
   InputAdornment,
   Modal,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { CanAccess, useList, useModal } from "@refinedev/core";
+import {
+  BaseKey,
+  CanAccess,
+  useList,
+  useModal,
+  useOne,
+  useUpdateMany,
+} from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -29,6 +43,7 @@ import {
   useDataGrid,
 } from "@refinedev/mui";
 import { ProjectType } from "@type/ProjectType";
+import { UserType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
 import {
   formatDurationToIndonesiaTime,
@@ -40,15 +55,36 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import _ from "lodash";
+import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
+import { PickerBase, PickerModal } from "mui-daterange-picker-plus";
+import type { DateRange } from "mui-daterange-picker-plus";
+import { CalendarIcon } from "@mui/x-date-pickers";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export default function TimesheetPage() {
+  const { mutate: recalculate } = useUpdateMany();
+
   const { visible, show, close } = useModal();
+  const {
+    visible: confirmationModal,
+    show: showConfirmationModal,
+    close: closeConfirmationModal,
+  } = useModal();
+  const {
+    visible: visibleCalendar,
+    show: showCalendar,
+    close: closeCalendar,
+  } = useModal();
+
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRows, setSelectedRows] = useState<BaseKey[]>();
+
+  const [dateRange, setDateRange] = useState<DateRange>({});
+
   const [initialValue, setInitialValue] = useState<WorkType>();
   useEffect(() => {
     setIsLoading(false);
@@ -66,15 +102,28 @@ export default function TimesheetPage() {
     close: closeEditModal,
   } = useModal();
 
-  const user = useMemo(() => getUserfromClientCookies(), []);
-  const userId = user?.id;
-  useEffect(() => {
-    if (userId) {
+  //get query params
+  const { id: paramId } = useParams();
+  const userCookie = useMemo(() => getUserfromClientCookies(), []);
+
+  const userId = useMemo(() => {
+    if (!paramId) {
+      return userCookie?.id;
+    } else {
+      return paramId;
     }
-  }, [userId]);
+  }, [userCookie, paramId]);
+
+  const { data: userData, isLoading: isLoadingUser } = useOne({
+    resource: "users",
+    id: userId as BaseKey,
+    queryOptions: { enabled: !!userId },
+  });
+
+  const user = userData?.data as UserType;
 
   const { dataGridProps, search, setFilters } = useDataGrid({
-    resource: "works",
+    resource: "timesheet",
     syncWithLocation: false,
     filters: {
       defaultBehavior: "replace",
@@ -226,6 +275,24 @@ export default function TimesheetPage() {
           return `${formatToIndonesianCurrency(params.row.totalIncome)}`;
         },
       },
+
+      {
+        field: "employeeRate",
+        flex: 1,
+        headerName: "Rate /Jam",
+        valueGetter: (params) => {
+          return `${formatToIndonesianCurrency(params.row.employeeRate)}`;
+        },
+      },
+
+      {
+        field: "setting.overtimeRate",
+        flex: 1,
+        headerName: "% Rate",
+        valueGetter: (params) => {
+          return `${params.row.setting.overtimeRate}%`;
+        },
+      },
       {
         field: "actions",
         headerName: "Aksi",
@@ -285,6 +352,28 @@ export default function TimesheetPage() {
       },
     ]);
   };
+
+  const handleRecalculate = () => {
+    recalculate(
+      {
+        resource: "timesheet",
+        values: {
+          employee: user?.id,
+        },
+        ids: selectedRows || [],
+        invalidates: ["list"],
+      },
+      {
+        onSuccess: () => {
+          closeConfirmationModal();
+        },
+        onError: () => {
+          closeConfirmationModal();
+        },
+      }
+    );
+  };
+
   if (!isLoading) {
     return (
       <CanAccess
@@ -302,7 +391,7 @@ export default function TimesheetPage() {
               <Stack direction={"column"}>
                 <Typography variant="body2">Rate</Typography>
                 <Typography>
-                  {formatToIndonesianCurrency(user.rate || 0)}/jam
+                  {formatToIndonesianCurrency(user?.rate || 0)}/jam
                 </Typography>
               </Stack>
             </Stack>
@@ -322,11 +411,51 @@ export default function TimesheetPage() {
               my: 4,
             }}
           >
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
               <Typography variant="h6" fontWeight={"bold"}>
                 Daftar Kegiatan
               </Typography>
-
+              <Tooltip
+                title={
+                  <Stack direction={"column"}>
+                    <Typography variant="caption">
+                      - perhitungan lembur adalah <br />
+                      (total durasi lembur * rate) * %rate lembur yang berlaku
+                      saat submit
+                    </Typography>
+                    <Typography variant="caption">
+                      - %rate lembur yang berlaku saat submit
+                    </Typography>
+                  </Stack>
+                }
+                arrow
+                disableInteractive
+              >
+                <QuestionMarkOutlined fontSize="small" color={"secondary"} />
+              </Tooltip>
+              <Tooltip
+                title={
+                  <Stack direction={"column"}>
+                    <Typography variant="caption">
+                      - perhitungan pendapatan dihandle dari backend ketika
+                      submit kegiatan
+                    </Typography>
+                    <Typography variant="caption">
+                      - untuk flow saat ini data rate diambil dari rate yang
+                      berlaku saat submit
+                    </Typography>
+                    <Typography variant="caption">
+                      - jika ingin update perhitungan dari data yang sudah ada,
+                      harus ada trigger untuk recalculate ke rate dan %rate saat
+                      ini
+                    </Typography>
+                  </Stack>
+                }
+                arrow
+                disableInteractive
+              >
+                <PriorityHighOutlined fontSize="small" color={"primary"} />
+              </Tooltip>
               <Button
                 color="secondary"
                 variant="outlined"
@@ -335,6 +464,16 @@ export default function TimesheetPage() {
               >
                 Tambah Kegiatan
               </Button>
+              {selectedRows && selectedRows?.length > 0 && (
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  startIcon={<UpdateOutlined />}
+                  onClick={showConfirmationModal}
+                >
+                  Kalkulasi Ulang
+                </Button>
+              )}
             </Stack>
 
             <Stack direction="row" spacing={2} alignItems="center">
@@ -352,6 +491,9 @@ export default function TimesheetPage() {
                   ),
                 }}
               />
+              <IconButton color="primary" onClick={showCalendar}>
+                <CalendarIcon />
+              </IconButton>
               <IconButton
                 color="primary"
                 onClick={() => {
@@ -367,6 +509,10 @@ export default function TimesheetPage() {
             columns={columns}
             autoHeight
             loading={loading}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => {
+              setSelectedRows(ids);
+            }}
           />
           <Stack direction="column">
             <Stack
@@ -463,14 +609,74 @@ export default function TimesheetPage() {
           onFilter={handleFilterProject}
         />
         <Modal open={visibleAddModal} onClose={closeAddModal}>
-          <AddWorkCard onClose={closeAddModal} />
+          <AddWorkCard onClose={closeAddModal} initialUser={user} />
         </Modal>
         <Modal open={visibleEditModal} onClose={closeEditModal}>
           <EditWorkCard
             onClose={closeEditModal}
             initialValue={initialValue as WorkType}
+            initialUser={user}
           />
         </Modal>
+
+        <ConfirmationDialog
+          open={confirmationModal}
+          onClose={closeConfirmationModal}
+          onConfirm={handleRecalculate}
+          title="Kalkulasi Ulang Kegiatan"
+          description="Apakah anda yakin ingin kalkulasi ulang kegiatan ?"
+        />
+        <PickerModal
+          onChange={(range: DateRange) => setDateRange(range)}
+          modalProps={{
+            open: visibleCalendar,
+            onClose: closeCalendar,
+            slotProps: {
+              root: {
+                sx: {
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  opacity: 1,
+                  transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                },
+              },
+              paper: {
+                sx: {
+                  position: "absolute",
+                  top: "50% !important",
+                  left: "50% !important",
+                  transform: "translate(-50%, -50%) !important",
+                },
+              },
+            },
+          }}
+          initialDateRange={{
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate,
+          }}
+          customProps={{
+            onSubmit: (value: DateRange) => {
+              setDateRange(value);
+              setFilters([
+                {
+                  field: "startDate",
+                  value: dayjs(value.startDate).toISOString(),
+                  operator: "gte",
+                },
+                {
+                  field: "endDate",
+                  value: dayjs(value.endDate).toISOString(),
+                  operator: "lte",
+                },
+              ]);
+              closeCalendar();
+            },
+            onCloseCallback() {
+              setDateRange({});
+              setFilters([]);
+              closeCalendar();
+            },
+          }}
+        />
       </CanAccess>
     );
   }
