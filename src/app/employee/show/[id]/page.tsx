@@ -8,6 +8,7 @@ import {
   AddCircleOutline,
   EditOutlined,
   FilterList,
+  ImportExportOutlined,
   PriorityHighOutlined,
   QuestionMarkOutlined,
   SearchOutlined,
@@ -20,7 +21,10 @@ import {
   Icon,
   IconButton,
   InputAdornment,
+  MenuItem,
   Modal,
+  Paper,
+  Popper,
   Stack,
   TextField,
   Tooltip,
@@ -56,10 +60,11 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import _ from "lodash";
 import { useParams } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { PickerBase, PickerModal } from "mui-daterange-picker-plus";
 import type { DateRange } from "mui-daterange-picker-plus";
 import { CalendarIcon } from "@mui/x-date-pickers";
+import { exportToExcel } from "@utility/export-table";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -79,6 +84,17 @@ export default function TimesheetPage() {
     show: showCalendar,
     close: closeCalendar,
   } = useModal();
+
+  const [openPopper, setOpenPopper] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClickPopper = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+    setOpenPopper((previousOpen) => !previousOpen);
+  };
+
+  const canBeOpen = openPopper && Boolean(anchorEl);
+  const idPopper = canBeOpen ? "exportimport-popper" : undefined;
 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRows, setSelectedRows] = useState<BaseKey[]>();
@@ -289,9 +305,10 @@ export default function TimesheetPage() {
         field: "setting.overtimeRate",
         flex: 1,
         headerName: "% Rate",
-        valueGetter: (params) => {
-          return `${params.row.setting.overtimeRate}%`;
+        renderCell: (params) => {
+          return params.row.setting?.overtimeRate;
         },
+        sortable: false,
       },
       {
         field: "actions",
@@ -372,6 +389,15 @@ export default function TimesheetPage() {
         },
       }
     );
+  };
+
+  const handleExport = (type: string) => {
+    const rows = dataGridProps?.rows || [];
+    if (type === "excel") {
+      exportToExcel({ columns, rows });
+    } else if (type === "csv") {
+      // exportToCSV();
+    }
   };
 
   if (!isLoading) {
@@ -476,7 +502,7 @@ export default function TimesheetPage() {
               )}
             </Stack>
 
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" gap={1} alignItems="center">
               <TextField
                 variant="outlined"
                 placeholder="Cari"
@@ -502,6 +528,33 @@ export default function TimesheetPage() {
               >
                 <FilterList />
               </IconButton>
+              <Fragment>
+                <IconButton
+                  color="primary"
+                  aria-describedby={idPopper}
+                  onClick={handleClickPopper}
+                >
+                  <ImportExportOutlined />
+                </IconButton>
+                <Popper
+                  id={idPopper}
+                  open={openPopper}
+                  anchorEl={anchorEl}
+                  placement="bottom-end"
+                  sx={{
+                    zIndex: 9999,
+                  }}
+                >
+                  <Paper>
+                    <MenuItem onClick={() => handleExport("excel")}>
+                      Export to Excel
+                    </MenuItem>
+                    <MenuItem>Export to CSV</MenuItem>
+                    <MenuItem>Print to PDF</MenuItem>
+                    <MenuItem>Import from CSV</MenuItem>
+                  </Paper>
+                </Popper>
+              </Fragment>
             </Stack>
           </Stack>
           <DataGrid
