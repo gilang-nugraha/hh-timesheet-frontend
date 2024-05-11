@@ -1,21 +1,43 @@
 # hh-timesheet-frontend
 
-<div align="center" style="margin: 30px;">
-    <a href="https://refine.dev">
-    <img alt="refine logo" src="https://refine.ams3.cdn.digitaloceanspaces.com/readme/refine-readme-banner.png">
-    </a>
-</div>
-<br/>
-
-This [Refine](https://github.com/refinedev/refine) project was generated with [create refine-app](https://github.com/refinedev/refine/tree/master/packages/create-refine-app).
+Timesheet Management using Next.Js
 
 ## Getting Started
 
-A React Framework for building internal tools, admin panels, dashboards & B2B apps with unmatched flexibility ✨
+For Fullstack Developer Take Home Test - Timesheet App
 
-Refine's hooks and components simplifies the development process and eliminates the repetitive tasks by providing industry-standard solutions for crucial aspects of a project, including authentication, access control, routing, networking, state management, and i18n.
+## Tech Stack
 
-## Available Scripts
+**Language:** Typescript
+
+**Client:** React, Next.js, Material UI, Tanstack Query, Refine
+
+**Server:** Node, Strapi
+
+## Feature
+
+- [x] Login Admin / User
+- [x] Employee (User)
+  - [x] CRUD Operation
+- [x] Timesheet
+  - [x] CRUD Operation
+  - [x] Calculate work,overtime,total duration
+  - [x] Calculate work,overtime,total income
+  - [x] Recalculate if update on rate and %rate
+  - [x] Filter by project
+  - [x] Filter by date range
+  - [x] Export to CSV, Excel & PDF
+  - [ ] Import data
+- [x] Setting
+  - [x] Update Work Time
+  - [x] Update overtime %rate
+  - [x] Update password
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+`NEXT_PUBLIC_API_URL= backend url or http://localhost:1337`
 
 ### Running the development server.
 
@@ -35,12 +57,9 @@ Refine's hooks and components simplifies the development process and eliminates 
     yarn start
 ```
 
-## Learn More
+## Feedback
 
-To learn more about **Refine**, please check out the [Documentation](https://refine.dev/docs)
-
-- **Strapi v4 Data Provider** [Docs](https://refine.dev/docs/core/providers/data-provider/#overview)
-- **Material UI** [Docs](https://refine.dev/docs/ui-frameworks/mui/tutorial/)
+If you have any feedback, please reach out to us at gilang.nugraha.h@gmail.com
 
 ## License
 
