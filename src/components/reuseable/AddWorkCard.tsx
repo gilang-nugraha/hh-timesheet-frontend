@@ -50,39 +50,42 @@ const style = {
 
 interface Props {
   initialValue?: WorkType;
+  initialUser?: UserType;
   onClose: () => void;
 }
-const AddWorkCard = ({ initialValue, onClose }: Props) => {
-  const invalidate = useInvalidate();
-
+const AddWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
   const { show, close, visible } = useModal();
-  const { open: openNotification, close: closeNotification } =
-    useNotification();
+  const { open: openNotification } = useNotification();
 
   const [selProject, setSelProject] = useState<ProjectType>();
   const [addProject, setAddProject] = useState<ProjectType>();
   const userRole = useMemo(() => getUserRoleFromClientCookies(), []);
-  const user = useMemo(() => getUserfromClientCookies(), []);
 
-  const { options: userSelectProps } = useSelect({
-    resource: "users",
-    hasPagination: false,
-    filters: [
-      {
-        field: "role",
-        operator: "eq",
-        value: userRole.id,
-      },
-    ],
-    optionLabel: "username",
-    optionValue: "id",
-  });
+  const user = useMemo(() => {
+    return initialUser || getUserfromClientCookies();
+  }, [initialUser]);
 
-  const userOptions = userSelectProps || [];
+  console.log("initialUser", initialUser);
+
+  // for admin testing purpose
+  // const { options: userSelectProps } = useSelect({
+  //   resource: "users",
+  //   hasPagination: false,
+  //   filters: [
+  //     {
+  //       field: "role",
+  //       operator: "eq",
+  //       value: userRole.id,
+  //     },
+  //   ],
+  //   optionLabel: "username",
+  //   optionValue: "id",
+  // });
+  // const userOptions = userSelectProps || [];
 
   const defaultValues: WorkType | WorkTypeRequest = initialValue || {
     name: "",
-    employee: "",
+    employee: user?.id,
     project: "",
     startDate: "",
     endDate: "",
@@ -148,15 +151,17 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
       "YYYY-MM-DD HH:mm"
     );
 
-    if (userRole.name !== "Manager") {
-      data.employee = user.id;
-    }
+    // for admin testing purpose
+    // if (userRole.name !== "Manager") {
+    //   data.employee = user.id;
+    // }
 
     const requestData = {
       ...data,
       startDate: combineStartDate,
       endDate: combineEndDate,
       employeeRate: user.rate,
+      employee: user.id,
     };
     onFinish(requestData);
   };
@@ -267,7 +272,8 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                     </FormControl>
                   </Grid>
                 </Grid>
-                {userRole?.name === "Manager" && (
+                {/* comment it now only for testing/debug purpose */}
+                {/* {userRole?.name === "Manager" && (
                   <FormControl fullWidth>
                     <InputLabel id="filter-select-label">
                       Pilih Karyawan *
@@ -300,7 +306,7 @@ const AddWorkCard = ({ initialValue, onClose }: Props) => {
                       })}
                     </Select>
                   </FormControl>
-                )}
+                )} */}
                 <FormControl fullWidth>
                   <TextField
                     {...register("name", {

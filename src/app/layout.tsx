@@ -49,6 +49,8 @@ export default function RootLayout({
                       list: "/works",
                       options: {
                         label: "Daftar Kegiatan",
+                        // hide it from now, i dont think it's needed
+                        hide: true,
                       },
                     },
                     {

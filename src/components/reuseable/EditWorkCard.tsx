@@ -70,21 +70,21 @@ const EditWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
     return initialUser || getUserfromClientCookies();
   }, [initialUser]);
 
-  const { options: userSelectProps } = useSelect({
-    resource: "users",
-    hasPagination: false,
-    filters: [
-      {
-        field: "role",
-        operator: "eq",
-        value: userRole.id,
-      },
-    ],
-    optionLabel: "username",
-    optionValue: "id",
-  });
-
-  const userOptions = userSelectProps || [];
+  // for admin testing purpose
+  // const { options: userSelectProps } = useSelect({
+  //   resource: "users",
+  //   hasPagination: false,
+  //   filters: [
+  //     {
+  //       field: "role",
+  //       operator: "eq",
+  //       value: userRole.id,
+  //     },
+  //   ],
+  //   optionLabel: "username",
+  //   optionValue: "id",
+  // });
+  // const userOptions = userSelectProps || [];
 
   const {
     refineCore: { onFinish, formLoading },
@@ -146,15 +146,17 @@ const EditWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
       "YYYY-MM-DD HH:mm"
     );
 
-    if (userRole.name !== "Manager") {
-      data.employee = user.id;
-    }
+    //for admin testing purpose
+    // if (userRole.name !== "Manager") {
+    //   data.employee = user.id;
+    // }
 
     const requestData = {
       ...data,
       startDate: combineStartDate,
       endDate: combineEndDate,
       employeeRate: user.rate,
+      employee: user.id,
     };
     onFinish(requestData);
   };
@@ -282,6 +284,41 @@ const EditWorkCard = ({ initialValue, initialUser, onClose }: Props) => {
                     defaultValue={initialValue?.name}
                   />
                 </FormControl>
+                {/* comment it now only for testing/debug purpose */}
+                {/* {userRole?.name === "Manager" && (
+                  <FormControl fullWidth>
+                    <InputLabel id="filter-select-label">
+                      Pilih Karyawan *
+                    </InputLabel>
+
+                    <Select
+                      labelId="filter-select-label"
+                      id="filter-select"
+                      {...register("employee", {
+                        required: "Wajib diisi",
+                      })}
+                      {...userSelectProps}
+                      required
+                      value={getValues("employee")}
+                      fullWidth
+                      variant="outlined"
+                      label="Pilih Karyawan *"
+                      error={!!(errors.employee && errors.employee.message)}
+                    >
+                      {userOptions?.map((option) => {
+                        return (
+                          <MenuItem
+                            key={option.value}
+                            value={option.value}
+                            disabled={option.value === getValues("employee")}
+                          >
+                            {option.label}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                )} */}
                 <FormControl fullWidth>
                   <ProjectAutocomplete
                     {...register("project", {

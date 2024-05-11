@@ -468,7 +468,7 @@ export default function TimesheetPage() {
           onFilter={handleFilterProject}
         />
         <Modal open={visibleAddModal} onClose={closeAddModal}>
-          <AddWorkCard onClose={closeAddModal} />
+          <AddWorkCard onClose={closeAddModal} initialUser={user} />
         </Modal>
         <Modal open={visibleEditModal} onClose={closeEditModal}>
           <EditWorkCard
