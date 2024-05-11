@@ -14,6 +14,8 @@ For Fullstack Developer Take Home Test - Timesheet App
 
 **Server:** Node, Strapi
 
+**Deployment:** Vercel
+
 ## Feature
 
 - [x] Login Admin / User
