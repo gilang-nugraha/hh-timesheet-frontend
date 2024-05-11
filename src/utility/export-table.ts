@@ -13,8 +13,7 @@ interface ExportRow {
   [header: string]: any;
 }
 
-export const exportToExcel = ({ columns, rows }: PopsType) => {
-  console.log("columns", columns, "rows", rows);
+export const exportToExcel = async ({ columns, rows }: PopsType) => {
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";

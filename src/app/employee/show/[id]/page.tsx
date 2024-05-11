@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import AddWorkCard from "@components/reuseable/AddWorkCard";
 import ConfirmationDialog from "@components/reuseable/ConfirmationDialog";
 import EditWorkCard from "@components/reuseable/EditWorkCard";
@@ -16,7 +18,10 @@ import {
   WarningOutlined,
 } from "@mui/icons-material";
 import {
+  Backdrop,
+  Box,
   Button,
+  CircularProgress,
   Divider,
   Icon,
   IconButton,
@@ -26,6 +31,11 @@ import {
   Paper,
   Popper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Tooltip,
   Typography,
@@ -49,7 +59,7 @@ import {
 } from "@refinedev/mui";
 import { ProjectType } from "@type/ProjectType";
 import { UserType } from "@type/UserType";
-import { WorkType } from "@type/WorkType";
+import { SummaryTimesheetType, WorkType } from "@type/WorkType";
 import {
   formatDurationToIndonesiaTime,
   formatToIndonesianCurrency,
@@ -66,14 +76,58 @@ import { PickerBase, PickerModal } from "mui-daterange-picker-plus";
 import type { DateRange } from "mui-daterange-picker-plus";
 import { CalendarIcon } from "@mui/x-date-pickers";
 import { exportToExcel } from "@utility/export-table";
+import Image from "next/image";
+import PDFWorkTemplate from "@components/reuseable/PDFWorkTemplate";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default function TimesheetPage() {
-  const { mutate: recalculate } = useUpdateMany();
+const handlePdf = async () => {
+  const htmlElement = document.getElementsByClassName("page");
+  if (!htmlElement) {
+    console.error("HTML element not found");
+    return;
+  }
 
+  const html2PDF = (await import("jspdf-html2canvas")).default;
+
+  await html2PDF(htmlElement as any, {
+    jsPDF: {
+      format: "a4",
+      orientation: "landscape",
+    },
+    html2canvas: {
+      scale: 5,
+    },
+    init: function (data) {
+      // console.log("data", data);
+    },
+    watermark({ pdf, pageNumber, totalPageNumber }) {
+      // pdf: jsPDF instance
+      pdf.setTextColor("#ddd");
+      pdf.text(
+        `page: ${pageNumber}/${totalPageNumber}`,
+        50,
+        pdf.internal.pageSize.height - 30
+      );
+    },
+    imageType: "image/jpeg",
+    output: "Timesheet.pdf",
+  });
+};
+
+const DynamicPdfComponent = dynamic(() => Promise.resolve(handlePdf) as any, {
+  ssr: false,
+});
+
+export default function EmployeeTimesheetPage() {
+  const { mutate: recalculate } = useUpdateMany();
+  const {
+    visible: loadingModal,
+    show: showLoadingModal,
+    close: closeLoadingModal,
+  } = useModal();
   const { visible, show, close } = useModal();
   const {
     visible: confirmationModal,
@@ -188,27 +242,15 @@ export default function TimesheetPage() {
 
   const logsheets = dataGridProps?.rows;
 
-  const summaryBaseDuration = useMemo(() => {
-    return _.sumBy(logsheets, "baseDuration");
-  }, [logsheets]);
-
-  const summaryOvertimeDuration = useMemo(() => {
-    return _.sumBy(logsheets, "overtimeDuration");
-  }, [logsheets]);
-
-  const summaryOvertimeIncome = useMemo(() => {
-    return _.sumBy(logsheets, "overtimeIncome");
-  }, [logsheets]);
-
-  const summaryBaseIncome = useMemo(() => {
-    return _.sumBy(logsheets, "baseIncome");
-  }, [logsheets]);
-  const summaryTotalIncome = useMemo(() => {
-    return _.sumBy(logsheets, "totalIncome");
-  }, [logsheets]);
-
-  const summaryTotalDuration = useMemo(() => {
-    return _.sumBy(logsheets, "totalDuration");
+  const summary: SummaryTimesheetType = useMemo(() => {
+    return {
+      baseDuration: _.sumBy(logsheets, "baseDuration"),
+      overtimeDuration: _.sumBy(logsheets, "overtimeDuration"),
+      overtimeIncome: _.sumBy(logsheets, "overtimeIncome"),
+      baseIncome: _.sumBy(logsheets, "baseIncome"),
+      totalIncome: _.sumBy(logsheets, "totalIncome"),
+      totalDuration: _.sumBy(logsheets, "totalDuration"),
+    };
   }, [logsheets]);
 
   const columns = React.useMemo<GridColDef[]>(
@@ -402,13 +444,17 @@ export default function TimesheetPage() {
     );
   };
 
-  const handleExport = (type: string) => {
+  const handleExport = async (type: string) => {
+    showLoadingModal();
     const rows = dataGridProps?.rows || [];
     if (type === "excel") {
-      exportToExcel({ columns, rows });
+      await exportToExcel({ columns, rows });
     } else if (type === "csv") {
-      exportCsv();
+      await exportCsv();
+    } else if (type === "pdf") {
+      await handlePdf();
     }
+    closeLoadingModal();
   };
 
   if (!isLoading) {
@@ -563,7 +609,9 @@ export default function TimesheetPage() {
                     <MenuItem onClick={() => handleExport("csv")}>
                       Export to CSV
                     </MenuItem>
-                    <MenuItem>Print to PDF</MenuItem>
+                    <MenuItem onClick={() => handleExport("pdf")}>
+                      Print to PDF
+                    </MenuItem>
                     {/* todo */}
                     {/* <MenuItem>Import from CSV</MenuItem> */}
                   </Paper>
@@ -592,7 +640,7 @@ export default function TimesheetPage() {
                 Total Durasi Normal
               </Typography>
               <Typography variant="body1" color="secondary">
-                {formatDurationToIndonesiaTime(summaryBaseDuration)}
+                {formatDurationToIndonesiaTime(summary.baseDuration)}
               </Typography>
             </Stack>
             <Stack
@@ -605,7 +653,7 @@ export default function TimesheetPage() {
                 Total Durasi Lembur
               </Typography>
               <Typography variant="body1" color="primary">
-                {formatDurationToIndonesiaTime(summaryOvertimeDuration)}
+                {formatDurationToIndonesiaTime(summary.overtimeDuration)}
               </Typography>
             </Stack>
             <Stack
@@ -618,7 +666,7 @@ export default function TimesheetPage() {
                 Total Pendapatan Normal
               </Typography>
               <Typography variant="body1" color="secondary">
-                {formatToIndonesianCurrency(summaryBaseIncome)}
+                {formatToIndonesianCurrency(summary.baseIncome)}
               </Typography>
             </Stack>
 
@@ -632,7 +680,7 @@ export default function TimesheetPage() {
                 Total Pendapatan Lembur
               </Typography>
               <Typography variant="body1" color="primary">
-                {formatToIndonesianCurrency(summaryOvertimeIncome)}
+                {formatToIndonesianCurrency(summary.overtimeIncome)}
               </Typography>
             </Stack>
             <Divider sx={{ my: 2 }} />
@@ -646,7 +694,7 @@ export default function TimesheetPage() {
                 Total Durasi
               </Typography>
               <Typography variant="h6" fontWeight={"bold"} color="secondary">
-                {formatDurationToIndonesiaTime(summaryTotalDuration)}
+                {formatDurationToIndonesiaTime(summary.totalDuration)}
               </Typography>
             </Stack>
 
@@ -660,7 +708,7 @@ export default function TimesheetPage() {
                 Total Pendapatan
               </Typography>
               <Typography variant="h5" fontWeight={"bold"} color="secondary">
-                {formatToIndonesianCurrency(summaryTotalIncome)}
+                {formatToIndonesianCurrency(summary.totalIncome)}
               </Typography>
             </Stack>
           </Stack>
@@ -744,6 +792,20 @@ export default function TimesheetPage() {
             },
           }}
         />
+        {loadingModal && (
+          <PDFWorkTemplate
+            rows={dataGridProps?.rows}
+            columns={columns}
+            user={user}
+            summary={summary}
+          />
+        )}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loadingModal}
+        >
+          <CircularProgress color="primary" />
+        </Backdrop>
       </CanAccess>
     );
   }
