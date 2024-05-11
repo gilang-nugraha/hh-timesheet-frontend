@@ -1,6 +1,7 @@
 "use client";
 
 import AddWorkCard from "@components/reuseable/AddWorkCard";
+import ConfirmationDialog from "@components/reuseable/ConfirmationDialog";
 import EditWorkCard from "@components/reuseable/EditWorkCard";
 import ModalFilter from "@components/reuseable/ModalFIlter";
 import {
@@ -10,6 +11,7 @@ import {
   PriorityHighOutlined,
   QuestionMarkOutlined,
   SearchOutlined,
+  UpdateOutlined,
   WarningOutlined,
 } from "@mui/icons-material";
 import {
@@ -25,7 +27,14 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { BaseKey, CanAccess, useList, useModal, useOne } from "@refinedev/core";
+import {
+  BaseKey,
+  CanAccess,
+  useList,
+  useModal,
+  useOne,
+  useUpdateMany,
+} from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -48,14 +57,34 @@ import utc from "dayjs/plugin/utc";
 import _ from "lodash";
 import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
+import { PickerBase, PickerModal } from "mui-daterange-picker-plus";
+import type { DateRange } from "mui-daterange-picker-plus";
+import { CalendarIcon } from "@mui/x-date-pickers";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export default function TimesheetPage() {
+  const { mutate: recalculate } = useUpdateMany();
+
   const { visible, show, close } = useModal();
+  const {
+    visible: confirmationModal,
+    show: showConfirmationModal,
+    close: closeConfirmationModal,
+  } = useModal();
+  const {
+    visible: visibleCalendar,
+    show: showCalendar,
+    close: closeCalendar,
+  } = useModal();
+
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRows, setSelectedRows] = useState<BaseKey[]>();
+
+  const [dateRange, setDateRange] = useState<DateRange>({});
+
   const [initialValue, setInitialValue] = useState<WorkType>();
   useEffect(() => {
     setIsLoading(false);
@@ -313,6 +342,28 @@ export default function TimesheetPage() {
       },
     ]);
   };
+
+  const handleRecalculate = () => {
+    recalculate(
+      {
+        resource: "timesheet",
+        values: {
+          employee: user?.id,
+        },
+        ids: selectedRows || [],
+        invalidates: ["list"],
+      },
+      {
+        onSuccess: () => {
+          closeConfirmationModal();
+        },
+        onError: () => {
+          closeConfirmationModal();
+        },
+      }
+    );
+  };
+
   if (!isLoading) {
     return (
       <CanAccess
@@ -403,6 +454,16 @@ export default function TimesheetPage() {
               >
                 Tambah Kegiatan
               </Button>
+              {selectedRows && selectedRows?.length > 0 && (
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  startIcon={<UpdateOutlined />}
+                  onClick={showConfirmationModal}
+                >
+                  Kalkulasi Ulang
+                </Button>
+              )}
             </Stack>
 
             <Stack direction="row" spacing={2} alignItems="center">
@@ -420,6 +481,9 @@ export default function TimesheetPage() {
                   ),
                 }}
               />
+              <IconButton color="primary" onClick={showCalendar}>
+                <CalendarIcon />
+              </IconButton>
               <IconButton
                 color="primary"
                 onClick={() => {
@@ -435,6 +499,10 @@ export default function TimesheetPage() {
             columns={columns}
             autoHeight
             loading={loading}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => {
+              setSelectedRows(ids);
+            }}
           />
           <Stack direction="column">
             <Stack
@@ -540,6 +608,65 @@ export default function TimesheetPage() {
             initialUser={user}
           />
         </Modal>
+
+        <ConfirmationDialog
+          open={confirmationModal}
+          onClose={closeConfirmationModal}
+          onConfirm={handleRecalculate}
+          title="Kalkulasi Ulang Kegiatan"
+          description="Apakah anda yakin ingin kalkulasi ulang kegiatan ?"
+        />
+        <PickerModal
+          onChange={(range: DateRange) => setDateRange(range)}
+          modalProps={{
+            open: visibleCalendar,
+            onClose: closeCalendar,
+            slotProps: {
+              root: {
+                sx: {
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  opacity: 1,
+                  transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                },
+              },
+              paper: {
+                sx: {
+                  position: "absolute",
+                  top: "50% !important",
+                  left: "50% !important",
+                  transform: "translate(-50%, -50%) !important",
+                },
+              },
+            },
+          }}
+          initialDateRange={{
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate,
+          }}
+          customProps={{
+            onSubmit: (value: DateRange) => {
+              setDateRange(value);
+              setFilters([
+                {
+                  field: "startDate",
+                  value: dayjs(value.startDate).toISOString(),
+                  operator: "gte",
+                },
+                {
+                  field: "endDate",
+                  value: dayjs(value.endDate).toISOString(),
+                  operator: "lte",
+                },
+              ]);
+              closeCalendar();
+            },
+            onCloseCallback() {
+              setDateRange({});
+              setFilters([]);
+              closeCalendar();
+            },
+          }}
+        />
       </CanAccess>
     );
   }
