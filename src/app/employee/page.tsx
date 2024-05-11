@@ -21,7 +21,7 @@ import {
 } from "@refinedev/mui";
 import { RoleType, UserType } from "@type/UserType";
 import { WorkType } from "@type/WorkType";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export default function EmployeePage() {
   const { visible, show, close } = useModal();
@@ -52,7 +52,7 @@ export default function EmployeePage() {
       ],
     },
   });
-  const columns = React.useMemo<GridColDef[]>(
+  const columns = useMemo<GridColDef[]>(
     () => [
       {
         field: "username",

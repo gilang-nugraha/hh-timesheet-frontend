@@ -29,7 +29,7 @@ import {
 import { ProjectType } from "@type/ProjectType";
 import { WorkType } from "@type/WorkType";
 import Image from "next/image";
-import React from "react";
+import React, { useMemo } from "react";
 
 export default function WorkPage() {
   const { visible, show, close } = useModal();
@@ -52,7 +52,7 @@ export default function WorkPage() {
 
   const { loading } = dataGridProps;
 
-  const columns = React.useMemo<GridColDef[]>(
+  const columns = useMemo<GridColDef[]>(
     () => [
       {
         field: "name",

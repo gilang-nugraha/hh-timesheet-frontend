@@ -238,7 +238,7 @@ export default function EmployeeTimesheetPage() {
     };
   }, [logsheets]);
 
-  const columns = React.useMemo<GridColDef[]>(
+  const columns = useMemo<GridColDef[]>(
     () => [
       {
         field: "name",
