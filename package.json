@@ -1,6 +1,10 @@
 {
   "name": "hh-timesheet-frontend",
   "version": "0.1.0",
+  "description": "Test Timesheet using Refine and Next.js",
+  "homepage": "https://gilanglie.com",
+  "repository": "https://github.com/gilang-nugraha/hh-timesheet-frontend",
+  "author": "Gilang Nugraha",
   "private": true,
   "engines": {
     "node": ">=18.0.0"
