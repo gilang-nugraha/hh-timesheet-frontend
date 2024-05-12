@@ -2,6 +2,8 @@
 
 Timesheet Management using Next.Js
 
+[Demo](https://timesheet-demo.gilanglie.com)
+
 ## Getting Started
 
 For Fullstack Developer Take Home Test - Timesheet App
@@ -40,7 +42,7 @@ For Fullstack Developer Take Home Test - Timesheet App
 
 To run this project, you will need to add the following environment variables to your .env file
 
-`NEXT_PUBLIC_API_URL= backend url or http://localhost:1337`
+`NEXT_PUBLIC_API_URL= backend url or http://localhost:1337 or https://api-timesheet-demo.gilanglie.com`
 
 ### Running the development server.
 
