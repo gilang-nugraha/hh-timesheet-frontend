@@ -9,6 +9,12 @@ Timesheet Management using Next.Js
 
 For Fullstack Developer Take Home Test - Timesheet App
 
+## Login account
+
+**Frontend Admin:** admin@demo.com / Password123
+**Frontend User:** testuser@gmail.com / Password123
+**Backend Admin:** gilang.nugraha.h@gmail.com / Password123
+
 ## Tech Stack
 
 **Language:** Typescript
