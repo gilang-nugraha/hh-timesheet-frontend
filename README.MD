@@ -2,7 +2,8 @@
 
 Timesheet Management using Next.Js
 
-[Demo](https://timesheet-demo.gilanglie.com)
+[Demo Frontend](https://timesheet-demo.gilanglie.com)
+[Demo Backend](https://api-timesheet-demo.gilanglie.com)
 
 ## Getting Started
 
